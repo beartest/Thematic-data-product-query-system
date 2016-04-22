@@ -1,0 +1,25 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+.Title
+{
+	color:#ffff77;
+	textAlign:justify;
+	textJustify:distribute;
+	fontWeight:normal;
+	fontWeight:bold;
+	fontFamily:"黑体";
+	fontSize:28;
+}
+
+.Subtitle
+{
+	color:#f7f7f7;
+	fontWeight:normal;
+	fontFamily:"黑体";
+	fontSize:18;
+}
+global
+{
+}
