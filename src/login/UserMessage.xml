@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+	<user>
+		<username>Admin</username>
+		<password>admin123</password>
+		<email></email>
+	</user>
+	<user>
+		<username>CuiJing</username>
+		<password>a111111</password>
+		<email>15231414512@163.com</email>
+	</user>
+</users>

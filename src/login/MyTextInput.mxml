@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="338" height="48">
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			public var nomalImageSource:String;//背景图片
+			
+			[Bindable]
+			public var focusImageSource:String;//焦点移上时背景图片
+			
+			[Bindable]
+			public var aspassword:Boolean;//是否是密码文字字段
+			
+			[Bindable]
+			public var _prompt:String;//空字符串时显示文字
+			
+			[Bindable]
+			private var _check:Boolean;//显示checkimage
+			public function set showcheckimage(value:Boolean):void
+			{
+				_check=value;
+				if(value)
+					checkimage.source="images/loginwindow/right.png";
+				else
+					checkimage.source="images/loginwindow/wrong.png";
+			}
+			public function get showcheckimage():Boolean
+			{
+				return _check;
+			}
+			
+			protected function mytext_focusInHandler(event:FocusEvent):void
+			{
+				currentState='focus';
+			}
+			
+			protected function mytext_focusOutHandler(event:FocusEvent):void
+			{
+				currentState='normal'
+			}
+			
+			protected function mytext_changeHandler(event:TextOperationEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="focus"/>
+	</s:states>
+	
+	<s:Image top="0" left="0" width="338" height="48" source.normal="{nomalImageSource}" source.focus="{focusImageSource}"/>
+	
+	<s:TextInput id="mytext" left="50" width="270" borderVisible="false" displayAsPassword="{aspassword}"
+				 focusIn="mytext_focusInHandler(event)" focusOut="mytext_focusOutHandler(event)"
+				 prompt="{_prompt}" verticalCenter="0" focusAlpha="0" change="mytext_changeHandler(event)"/>
+	<s:Image id="checkimage" top="5" bottom="5" right="10" width="38" height="38"/>
+</s:Group>
