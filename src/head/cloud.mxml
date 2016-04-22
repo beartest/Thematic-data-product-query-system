@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="200"
+		  xmlns:Cloud="head.*" creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			protected function init(event:FlexEvent):void
+			{
+				tagID.dataFunc(xmlID);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="xmlID" source="tagcloud.xml"/>
+	</fx:Declarations>
+	
+	<Cloud:Cloud id="tagID" width="100%" height="100%" backgroundAlpha="0" 
+				 horizontalCenter="0" verticalCenter="0" includeInLayout="true"
+				 clipContent="true" howElliptical="3"/>
+</s:Module>
