@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%" horizontalScrollPolicy="off"
+		   creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				if(this.numElements==0)
+				{
+					for(var i:Number=0;i<myXML.Storage.length();i++)
+					{
+						createnote(i,i);
+					}
+				}
+			}
+			
+			public function additem(formbean:StorehouseFormBean):void
+			{
+				this.removeAllElements();
+				var j:int=0;
+				for(var i:int=0;i<myXML.Storage.length();i++)
+				{
+					if(formbean.temptype!="不限"&&myXML.Storage[i].TempType!=null&&formbean.temptype!=myXML.Storage[i].TempType)
+						continue;
+					if(formbean.type!="不限"&&myXML.Storage[i].Type!=null&&formbean.type!=myXML.Storage[i].Type)
+						continue;
+					if(formbean.area!="不限"&&myXML.Storage[i].Area!=null)
+					{
+						var str:String=myXML.Storage[i].Area;
+						str=str.substr(0,str.length-3);
+						if(formbean.area!=">10000 平方米")
+						{
+							if(formbean.minarea>Number(str)||formbean.maxarea<Number(str))
+								continue;
+						}
+						else if(Number(str)<=10000)
+							continue;
+					}
+					if(formbean.isLatLonType)
+					{
+						if(formbean.minlat!=0&&formbean.minlat>myXML.Storage[i].Lat)
+							continue;
+						if(formbean.maxlat!=0&&formbean.maxlat<myXML.Storage[i].Lat)
+							continue;
+						if(formbean.minlon!=0&&formbean.minlon>myXML.Storage[i].Lon)
+							continue;
+						if(formbean.maxlon!=0&&formbean.maxlon<myXML.Storage[i].Lon)
+							continue;
+						createnote(i,j);
+						j++;
+					}
+					else
+					{
+						if(formbean.province!=null&&formbean.province!=myXML.Storage[i].Region.province)
+							continue;
+						if(formbean.city!=null&&formbean.city!=myXML.Storage[i].Region.city)
+							continue;
+						if(formbean.country!=null&&formbean.country!=myXML.Storage[i].Region.country)
+							continue;
+						createnote(i,j);
+						j++;
+					}		
+					
+				}
+			}
+			
+			private function createnote(i:int,j:int):void
+			{
+				var node:storehouse=new storehouse();//定义storehouse类
+				
+				node.name=myXML.Storage[i].Name;
+				node.id=myXML.Storage[i].ID;
+				node.province=myXML.Storage[i].Region.province;
+				node.city=myXML.Storage[i].Region.city;
+				node.country=myXML.Storage[i].Region.country;
+				node.address=myXML.Storage[i].Region.address;
+				node.tempType=myXML.Storage[i].TempType;
+				node.type=myXML.Storage[i].Type;
+				node.manage=myXML.Storage[i].Manage;
+				node.area=myXML.Storage[i].Area;
+				node.volume=myXML.Storage[i].Volume;
+				node.price=myXML.Storage[i].Price;
+				node.contactor=myXML.Storage[i].Contactor;
+				node.phone=myXML.Storage[i].Phone;
+				node.date=myXML.Storage[i].Date;
+				node.time=myXML.Storage[i].Time;
+				node.picture=myXML.Storage[i].Picture;
+				node.lat=myXML.Storage[i].Lat;
+				node.lon=myXML.Storage[i].Lon;
+				
+				var item:StorehouseItem=new StorehouseItem();
+				item.x=0;
+				item.y=70*j;
+				item.para=node;
+				if(_map)
+				{
+					item.map=_map;
+				}
+				this.addElement(item); 
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="myXML" source="Storehouse.xml"/>
+	</fx:Declarations>
+</mx:Canvas>

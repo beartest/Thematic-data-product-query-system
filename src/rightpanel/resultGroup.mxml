@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" xmlns:rightpanel="rightpanel.*">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			[Embed(source="images/search/van_blue_24.png")]
+			private var var_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/van_white_24.png")]
+			private var var_white:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/goods_blue_24.png")]
+			private var goods_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/goods_white_24.png")]
+			private var goods_white:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/storehouse_blue_24.png")]
+			private var storehouse_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/storehouse_white_24.png")]
+			private var storehouse_white:Class;
+			
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				if(_map)
+				{
+				   child1.map=_map;
+				}
+			}
+			
+			protected function tabbar_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(event.oldIndex)
+				{
+					case 0:
+						child1.icon=storehouse_blue;
+						break;
+					case 1:
+						child2.icon=var_blue;
+						break;
+					case 2:
+						child3.icon=goods_blue;
+						break;
+				}
+				switch(event.newIndex)
+				{
+					case 0:
+						child1.icon=storehouse_white;
+						break;
+					case 1:
+						child2.icon=var_white;
+						break;
+					case 2:
+						child3.icon=goods_white;
+						break;
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Rect width="100%" height="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="#28b3e6" weight="2"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:VGroup left="1" top="1" width="300" height="400" gap="0">
+		<s:TabBar id="myTabBar" height="30" change="tabbar_changeHandler(event)"
+				  dataProvider="{viewStack}" skinClass="skins.rightpanel.ImageTabBarSkin">
+			<!--<<s:dataProvider>
+			s:ArrayCollection source="['冷库信息','车源信息','货源信息']"
+			</s:dataProvider>/>-->
+		</s:TabBar>
+		
+		<mx:ViewStack id="viewStack" top="30" width="300" height="440">
+			
+			<!--冷库信息-->
+			<rightpanel:StorehouseResultCanvas id="child1" label="冷库信息" icon="{storehouse_white}">
+				
+			</rightpanel:StorehouseResultCanvas>	
+			
+			<!--车源信息-->
+			<rightpanel:VanResultCanvas id="child2" label="车源信息" icon="{var_blue}">
+				
+			</rightpanel:VanResultCanvas>
+			
+			<!--货源信息-->
+			<rightpanel:GoodsResultCanvas id="child3" label="货源信息" icon="{goods_blue}">
+				
+			</rightpanel:GoodsResultCanvas>
+
+		</mx:ViewStack>
+		
+	</s:VGroup>
+</s:Group>

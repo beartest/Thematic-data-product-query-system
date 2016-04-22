@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%" xmlns:rightpanel="rightpanel.*">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			[Embed(source="images/search/van_blue_24.png")]
+			private var var_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/van_white_24.png")]
+			private var var_white:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/goods_blue_24.png")]
+			private var goods_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/goods_white_24.png")]
+			private var goods_white:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/storehouse_blue_24.png")]
+			private var storehouse_blue:Class;
+			
+			[Bindable]
+			[Embed(source="images/search/storehouse_white_24.png")]
+			private var storehouse_white:Class;
+			
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				if(_map)
+				{
+					child1.map=_map;
+				}
+			}
+
+			protected function tabbar_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(event.oldIndex)
+				{
+					case 0:
+						child1.icon=storehouse_blue;
+						break;
+					case 1:
+						child2.icon=var_blue;
+						break;
+					case 2:
+						child3.icon=goods_blue;
+						break;
+				}
+				switch(event.newIndex)
+				{
+					case 0:
+						child1.icon=storehouse_white;
+						break;
+					case 1:
+						child2.icon=var_white;
+						break;
+					case 2:
+						child3.icon=goods_white;
+						break;
+				}
+			}
+			
+			private function searchresult():void
+			{
+				var mypanel:rightpanel=this.owner.parent.parent as rightpanel;
+				switch(tabbar.selectedIndex)
+				{
+					case 0:
+						mypanel.myResult.myTabBar.selectedIndex=0;
+						var formbean1:StorehouseFormBean=new StorehouseFormBean();
+ 						if(child1.regionTabBar.selectedIndex==0)
+						{
+							formbean1.isLatLonType=false;
+							formbean1.province=child1.provinceCB.selectedItem;
+							formbean1.city=child1.cityCB.selectedItem;
+							formbean1.country=child1.countryCB.selectedItem;
+							
+						}
+						else if(child1.regionTabBar.selectedIndex==1)
+						{
+							formbean1.isLatLonType=true;
+							formbean1.minlat=Number(child1.minLat.text);
+							formbean1.maxlat=Number(child1.maxLat.text);
+							formbean1.minlon=Number(child1.minLon.text);
+							formbean1.maxlon=Number(child1.maxLon.text);
+						} 
+						formbean1.area=child1.areaCB.selectedItem;
+						formbean1.type=child1.typeCB.selectedItem;
+						formbean1.temptype=child1.temptypeCB.selectedItem;
+						mypanel.myResult.child1.additem(formbean1);
+						break;
+					case 1:
+						mypanel.myResult.myTabBar.selectedIndex=1;
+						var formbean2:VanFormBean=new VanFormBean();
+						formbean2.provinceCOC=child2.provinceCB1.selectedItem;
+						formbean2.cityCOC=child2.cityCB1.selectedItem;
+						formbean2.countryCOC=child2.countryCB1.selectedItem;
+						formbean2.provinceDDU=child2.provinceCB2.selectedItem;
+						formbean2.cityDDU=child2.cityCB2.selectedItem;
+						formbean2.countryDDU=child2.countryCB2.selectedItem;
+						formbean2.type=child2.typeCB.selectedItem;
+						formbean2.tempType=child2.tempTypeCB.selectedItem;
+						formbean2.weight=child2.weightCB.selectedItem;
+						formbean2.volume=child2.volumeCB.selectedItem;
+						mypanel.myResult.child2.additem(formbean2);
+						break;
+					case 2:
+						mypanel.myResult.myTabBar.selectedIndex=2;
+						var formbean3:GoodsFormBean=new GoodsFormBean();
+						formbean3.provinceCOC=child3.provinceCB1.selectedItem;
+						formbean3.cityCOC=child3.cityCB1.selectedItem;
+						formbean3.countryCOC=child3.countryCB1.selectedItem;
+						formbean3.provinceDDU=child3.provinceCB2.selectedItem;
+						formbean3.cityDDU=child3.cityCB2.selectedItem;
+						formbean3.countryDDU=child3.countryCB2.selectedItem;
+						formbean3.vanType=child3.vanTypeCB.selectedItem;
+						mypanel.myResult.child3.additem(formbean3);
+						break;
+				}
+				
+				mypanel.myTabBar.selectedIndex=1;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Rect width="100%" height="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="#28b3e6" weight="2"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:VGroup left="1" top="1" width="300" height="400" gap="0">
+		<s:TabBar id="tabbar" height="30" change="tabbar_changeHandler(event)"
+				  dataProvider="{viewStack}" skinClass="skins.rightpanel.ImageTabBarSkin">
+			<!--<<s:dataProvider>
+			s:ArrayCollection source="['冷库信息','车源信息','货源信息']"
+			</s:dataProvider>/>-->
+		</s:TabBar>
+		
+		<mx:ViewStack id="viewStack" top="30" width="300" height="400">
+			
+			<!--冷库信息-->
+			<rightpanel:StorehouseCanvas id="child1" label="冷库信息" icon="{storehouse_white}">
+				<rightpanel:filters>
+					<s:GlowFilter color="0x1C8AC9"/>
+				</rightpanel:filters>
+			</rightpanel:StorehouseCanvas>
+			
+			<!--车源信息-->
+			<rightpanel:VanCanvas id="child2" label="车源信息" icon="{var_blue}">
+				<rightpanel:filters>
+					<s:GlowFilter color="0x1C8AC9"/>
+				</rightpanel:filters>
+			</rightpanel:VanCanvas>
+			
+			<!--货源信息-->
+			<rightpanel:GoodsCanvas id="child3" label="货源信息" icon="{goods_blue}">
+				<rightpanel:filters>
+					<s:GlowFilter color="0x1C8AC9"/>
+				</rightpanel:filters>
+			</rightpanel:GoodsCanvas>
+		</mx:ViewStack>
+		
+	</s:VGroup>
+	<s:Button label="结果查询" left="80" bottom="15" height="30" width="160" skinClass="skins.rightpanel.SearchButton" 
+			  icon="images/search/search_16.png" click="searchresult()"/>
+</s:Group>

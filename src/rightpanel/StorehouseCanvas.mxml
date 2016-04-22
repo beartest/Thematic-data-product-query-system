@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="300" height="400" creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				maxLat.text=Mercator2lonLat_Y(_map.extent.ymax).toString();
+				minLat.text=Mercator2lonLat_Y(_map.extent.ymin).toString();
+				maxLon.text=Mercator2lonLat_X(_map.extent.xmax).toString();
+				minLon.text=Mercator2lonLat_X(_map.extent.xmin).toString();
+			}
+			
+			public function Mercator2lonLat_X(mercatorX:Number):Number
+			{
+				var x:Number=mercatorX/20037508.34 * 180;
+				return x;
+			}
+			
+			public function Mercator2lonLat_Y(mercatorY:Number):Number
+			{
+				var y:Number=mercatorY/20037508.34 * 180;
+				y = 180 / Math.PI * (2 * Math.atan(Math.exp(y * Math.PI / 180)) - Math.PI / 2);
+				return y;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{  
+				//行政区ComBoBox初始化
+				var province:ArrayCollection=new ArrayCollection();
+				for each(var pro:XML in myXML.province)
+				{
+					province.addItem(new String(pro.attributes()));
+				}
+				provinceCB.dataProvider=province;
+				
+				var city:ArrayCollection=new ArrayCollection();
+				for each(var cit:XML in myXML.province[0].city)
+				{
+					city.addItem(new String(cit.attributes()));
+				}
+				cityCB.dataProvider=city;
+				
+				var country:ArrayCollection=new ArrayCollection();
+				for each(var cou:XML in myXML.province[0].city[0].country)
+				{
+					country.addItem(new String(cou.attributes()));
+				}
+				countryCB.dataProvider=country;
+			}
+			
+			protected function changeSelection(event:IndexChangeEvent):void
+			{
+				switch(TabBar(event.target).selectedIndex)
+				{
+					case 0:
+					{
+						this.currentState = "politicalRegionState";
+						break;
+					}
+					case 1:
+					{
+						this.currentState = "latLonState";
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			protected function provinceCB_changeHandler(event:IndexChangeEvent):void
+			{
+				var city:ArrayCollection=new ArrayCollection();
+				for each(var cit:XML in myXML.province[event.newIndex].city)
+				{
+					city.addItem(new String(cit.attributes()));
+				}
+				cityCB.dataProvider=city;
+				cityCB.selectedIndex=0;
+				
+				var country:ArrayCollection=new ArrayCollection();
+				for each(var cou:XML in myXML.province[event.newIndex].city[0].country)
+				{
+					country.addItem(new String(cou.attributes()));
+				}
+				countryCB.dataProvider=country;
+				countryCB.selectedIndex=0;
+			}
+			
+			protected function cityCB_changeHandler(event:IndexChangeEvent):void
+			{
+				var country:ArrayCollection=new ArrayCollection();
+				for each(var item:XML in myXML.province[provinceCB.selectedIndex].city[event.newIndex].country)
+				{
+					country.addItem(new String(item.attributes()));
+				}
+				countryCB.dataProvider=country;
+				countryCB.selectedIndex=0;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="myXML" source="Area.xml"/>
+	</fx:Declarations>
+	
+	<mx:states>
+		<s:State name="politicalRegionState" />
+		<s:State name="latLonState" />
+	</mx:states>
+	
+	<s:VGroup x="0" y="0" width="300" height="400" horizontalAlign="center">
+
+		<!--区域-->
+		<s:VGroup width="100%" gap="-1">
+			
+			<s:Group width="100%">
+				<s:TabBar id="regionTabBar" right="9" top="10" height="23" color="0x25517b" fontSize="13" change="changeSelection(event)" skinClass="skins.rightpanel.TabBarWeakColorSkin">
+					<s:dataProvider>
+						<s:ArrayCollection source="['行政区','经纬度']"/>
+					</s:dataProvider>
+				</s:TabBar>
+			</s:Group>
+			
+			<s:Group width="100%">
+				<!--行政区-->
+				<s:Group width="100%" visible="false" visible.politicalRegionState="true" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="10" left="10" top="20" bottom="20" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="省/市/自治区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="provinceCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="provinceCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="地级市/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="cityCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="cityCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="县级市/县/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="countryCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name">
+							</s:ComboBox>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>
+				
+				<!--经纬度-->
+				<s:Group width="100%" visible="false" visible.latLonState="true" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="5" left="5" top="20" bottom="20" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+							<s:Label width="65" color="0x333333" fontFamily="黑体" text="最大纬度："
+									 textAlign="right"
+									 width.politicalRegionState="60"/>
+							<s:TextInput id="maxLat" width="55" height="28"
+										 skinClass="skins.rightpanel.TextInputSkin"
+										 width.politicalRegionState="60"/>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="65" color="0x333333" fontFamily="黑体" text="最小经度："
+									 textAlign="right"
+									 width.politicalRegionState="60"/>
+							<s:TextInput id="minLon" width="55" height="28"
+										 skinClass="skins.rightpanel.TextInputSkin"
+										 width.politicalRegionState="60"/>
+							<s:Spacer width="100%" />
+							<s:Label width="65" color="0x333333" fontFamily="黑体" text="最大经度："
+									 textAlign="right"
+									 width.politicalRegionState="60"/>
+							<s:TextInput id="maxLon" width="55" height="28"
+										 skinClass="skins.rightpanel.TextInputSkin"
+										 width.politicalRegionState="60"/>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+							<s:Label width="65" color="0x333333" fontFamily="黑体" text="最小纬度："
+									 textAlign="right"
+									 width.politicalRegionState="60"/>
+							<s:TextInput id="minLat" width="55" height="28"
+										 skinClass="skins.rightpanel.TextInputSkin"
+										 width.politicalRegionState="60"/>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>
+			</s:Group>
+		</s:VGroup>
+		
+		<!--属性-->
+		<s:VGroup width="100%" gap="-1">
+			
+			<s:Group width="100%">
+				<s:TabBar right="9" top="10" height="23" color="0x25517b" fontSize="13" skinClass="skins.rightpanel.TabBarWeakColorSkin">
+					<s:dataProvider>
+						<s:ArrayCollection source="['属性信息']"/>
+					</s:dataProvider>
+				</s:TabBar>
+			</s:Group>
+			
+			<s:Group width="100%">
+				<s:Group width="100%" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="5" left="5" top="20" bottom="20" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="面积大小" textAlign="center" fontFamily="黑体"/>
+							<s:ComboBox id="areaCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" selectedIndex="0">
+								<s:ArrayCollection>
+									<fx:String>不限</fx:String>     
+									<fx:String>0-1000 平方米</fx:String>  
+									<fx:String>1001-3000 平方米</fx:String>  
+									<fx:String>3001-10000 平方米</fx:String>  
+									<fx:String>>10000 平方米</fx:String>  
+								</s:ArrayCollection>
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="仓库类型" textAlign="center" fontFamily="黑体"/>
+							<s:ComboBox id="typeCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" selectedIndex="0">
+								<s:ArrayCollection>
+									<fx:String>不限</fx:String>        
+									<fx:String>驶入式</fx:String>  
+									<fx:String>横梁式</fx:String>  
+									<fx:String>双伸式</fx:String>  
+									<fx:String>穿梭式</fx:String> 
+									<fx:String>窄巷道横梁式</fx:String>  
+									<fx:String>自动化</fx:String>  
+									<fx:String>平堆式</fx:String> 
+								</s:ArrayCollection>
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="库温类型" textAlign="center" fontFamily="黑体"/>
+							<s:ComboBox id="temptypeCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" selectedIndex="0">
+								<s:ArrayCollection>
+									<fx:String>不限</fx:String>   
+									<fx:String>常温</fx:String>  
+									<fx:String>冷藏</fx:String>  
+									<fx:String>冷冻</fx:String>  
+									<fx:String>急冻</fx:String> 
+									<fx:String>深冷</fx:String>  
+									<fx:String>气调</fx:String>  
+								</s:ArrayCollection>
+							</s:ComboBox>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>	
+			</s:Group>
+		</s:VGroup>	
+	</s:VGroup>
+</mx:Canvas>

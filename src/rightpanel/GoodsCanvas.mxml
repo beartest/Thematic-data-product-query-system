@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="300" height="400" creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			protected function init(event:FlexEvent):void
+			{  
+				//行政区ComBoBox初始化
+				var province:ArrayCollection=new ArrayCollection();
+				for each(var pro:XML in myXML.province)
+				{
+					province.addItem(new String(pro.attributes()));
+				}
+				provinceCB1.dataProvider=province;
+				provinceCB2.dataProvider=province;
+				
+				var city:ArrayCollection=new ArrayCollection();
+				for each(var cit:XML in myXML.province[0].city)
+				{
+					city.addItem(new String(cit.attributes()));
+				}
+				cityCB1.dataProvider=city;
+				cityCB2.dataProvider=city;
+				
+				var country:ArrayCollection=new ArrayCollection();
+				for each(var cou:XML in myXML.province[0].city[0].country)
+				{
+					country.addItem(new String(cou.attributes()));
+				}
+				countryCB1.dataProvider=country;
+				countryCB2.dataProvider=country;
+			}
+			
+			protected function changeSelection(event:IndexChangeEvent):void
+			{
+				switch(TabBar(event.target).selectedIndex)
+				{
+					case 0:
+					{
+						this.currentState = "COCState";
+						break;
+					}
+					case 1:
+					{
+						this.currentState = "destinationState";
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			protected function provinceCB_changeHandler(event:IndexChangeEvent):void
+			{
+				var city:ArrayCollection=new ArrayCollection();
+				for each(var cit:XML in myXML.province[event.newIndex].city)
+				{
+					city.addItem(new String(cit.attributes()));
+				}
+				var country:ArrayCollection=new ArrayCollection();
+				for each(var cou:XML in myXML.province[event.newIndex].city[0].country)
+				{
+					country.addItem(new String(cou.attributes()));
+				}
+				if(event.target.id=="provinceCB1")
+				{
+					cityCB1.dataProvider=city;
+					cityCB1.selectedIndex=0;
+					countryCB1.dataProvider=country;
+					countryCB1.selectedIndex=0;
+				}
+				else
+				{
+					cityCB2.dataProvider=city;
+					cityCB2.selectedIndex=0;
+					countryCB2.dataProvider=country;
+					countryCB2.selectedIndex=0;
+				}
+			}
+			
+			protected function cityCB_changeHandler(event:IndexChangeEvent):void
+			{
+				var country:ArrayCollection=new ArrayCollection();
+				if(event.target.id=="cityCB1")
+				{
+					for each(var item1:XML in myXML.province[provinceCB1.selectedIndex].city[event.newIndex].country)
+					{
+						country.addItem(new String(item1.attributes()));
+					}
+					countryCB1.dataProvider=country;
+					countryCB1.selectedIndex=0;
+				}
+				else
+				{
+					for each(var item2:XML in myXML.province[provinceCB2.selectedIndex].city[event.newIndex].country)
+					{
+						country.addItem(new String(item2.attributes()));
+					}
+					countryCB2.dataProvider=country;
+					countryCB2.selectedIndex=0;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="myXML" source="Area.xml"/>
+	</fx:Declarations>
+	
+	<mx:states>
+		<s:State name="COCState" />
+		<s:State name="destinationState" />
+	</mx:states>
+	
+	<s:VGroup x="0" y="0" width="300" height="400" horizontalAlign="center" gap="5">
+		
+		<!--始发地-->
+		<s:VGroup width="100%" gap="-1">
+			
+			<s:Group width="100%">
+				<s:TabBar right="9" top="10" height="23" color="0x25517b" fontSize="13" change="changeSelection(event)" skinClass="skins.rightpanel.TabBarWeakColorSkin">
+					<s:dataProvider>
+						<s:ArrayCollection source="['始发地','目的地']"/>
+					</s:dataProvider>
+				</s:TabBar>
+			</s:Group>
+			
+			<s:Group width="100%">
+				<s:Group width="100%" visible="false" visible.COCState="true" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="10" left="10" top="20" bottom="20" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="省/市/自治区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="provinceCB1" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="provinceCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="地级市/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="cityCB1" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="cityCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="县级市/县/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="countryCB1" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name">
+							</s:ComboBox>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>
+				
+				<s:Group width="100%" visible="false" visible.destinationState="true" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="10" left="10" top="20" bottom="20" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="省/市/自治区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="provinceCB2" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="provinceCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="地级市/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="cityCB2" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name" change="cityCB_changeHandler(event)">
+							</s:ComboBox>
+						</s:HGroup>
+						<s:HGroup width="100%" height="100%" verticalAlign="middle">
+							<s:Label width="85" text="县级市/县/区：" textAlign="right" fontFamily="黑体"/>
+							<s:ComboBox id="countryCB2" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" labelField="name">
+							</s:ComboBox>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>
+			</s:Group>
+		</s:VGroup>
+		
+		
+		
+		<!--属性-->
+		<s:VGroup width="100%" gap="-1">
+			
+			<s:Group width="100%">
+				<s:TabBar right="9" top="10" height="23" color="0x25517b" fontSize="13" skinClass="skins.rightpanel.TabBarWeakColorSkin">
+					<s:dataProvider>
+						<s:ArrayCollection source="['属性信息']"/>
+					</s:dataProvider>
+				</s:TabBar>
+			</s:Group>
+			
+			<s:Group width="100%">
+				<s:Group width="100%" height="150" left="10" right="10">
+					<s:Rect right="0" left="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="0xe3eff4"/>
+						</s:fill>
+					</s:Rect>
+					<s:VGroup right="5" left="5" top="10" bottom="10" gap="15">
+						<s:HGroup width="100%" height="100%" verticalAlign="top">
+							<s:Label width="85" height="28" text="车型要求" textAlign="center" fontFamily="黑体" verticalAlign="middle"/>
+							<s:ComboBox id="vanTypeCB" skinClass="skins.rightpanel.BlueComboBoxSkin"
+										width="100%" height="28" selectedIndex="0">
+								<s:ArrayCollection>
+									<fx:String>不限</fx:String>  
+									<fx:String>4.2米</fx:String>  
+									<fx:String>5.5米</fx:String>  
+									<fx:String>6.5米</fx:String>  
+									<fx:String>7.2米</fx:String>  
+									<fx:String>8.6米</fx:String>  
+									<fx:String>9.6米</fx:String>  
+									<fx:String>13.7米</fx:String>     
+									<fx:String>14.7米</fx:String>  
+									<fx:String>16.5米</fx:String> 
+								</s:ArrayCollection>
+							</s:ComboBox>
+						</s:HGroup>
+					</s:VGroup>
+				</s:Group>
+			</s:Group>
+		</s:VGroup>
+	</s:VGroup>
+</mx:Canvas>

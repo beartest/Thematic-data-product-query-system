@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%" horizontalScrollPolicy="off"
+		   creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				if(this.numElements==0)
+				{
+					for(var i:Number=0;i<myXML.Goods.length();i++)
+					{
+						createnote(i,i);
+					}
+				}
+			}
+			
+			public function additem(formbean:GoodsFormBean):void
+			{
+				this.removeAllElements();
+				var j:int=0;
+				for(var i:int=0;i<myXML.Goods.length();i++)
+				{
+					if(formbean.provinceCOC!=null&&formbean.provinceCOC!=myXML.Goods[i].COC.province)
+						continue;
+					if(formbean.cityCOC!=null&&formbean.cityCOC!=myXML.Goods[i].COC.city)
+						continue;
+					if(formbean.countryCOC!=null&&formbean.countryCOC!=myXML.Goods[i].COC.country)
+						continue;
+					if(formbean.provinceDDU!=null&&formbean.provinceDDU!=myXML.Goods[i].DDU.province)
+						continue;
+					if(formbean.cityDDU!=null&&formbean.cityDDU!=myXML.Goods[i].DDU.city)
+						continue;
+					if(formbean.countryDDU!=null&&formbean.countryDDU!=myXML.Goods[i].DDU.country)
+						continue;
+					if(formbean.vanType!="不限"&&myXML.Goods[i].VanType!=null&&formbean.vanType!=myXML.Goods[i].VanType)
+						continue;
+					createnote(i,j);
+					j++;		
+				}
+			}
+			
+			public function additemByCloud(name:String):void
+			{
+				this.removeAllElements();
+				var j:int=0;
+				for(var i:int=0;i<myXML.Goods.length();i++)
+				{
+					if(name!=myXML.Goods[i].Type)
+						continue;
+					createnote(i,j);
+					j++;		
+				}
+			}
+			
+			private function createnote(i:int,j:int):void
+			{
+				var node:goods=new goods();//定义goods类
+				
+				node.id=myXML.Goods[i].ID//货源编号
+				node.owner=myXML.Goods[i].Owner//货主
+				node.type=myXML.Goods[i].Type//货物类型
+				node.weight=myXML.Goods[i].Weight//货物重量
+				node.volume=myXML.Goods[i].Volume//货物体积
+				node.vanType=myXML.Goods[i].VanType//车辆类型
+				node.payment=myXML.Goods[i].Payment//运费支付方式
+				node.transport=myXML.Goods[i].Transport//运输方式
+				node.temperature=myXML.Goods[i].Temperature//温度要求
+				node.time=myXML.Goods[i].Time//发布日期
+				node.validityTime=myXML.Goods[i].ValidityTime//信息有效期
+				node.provinceCOC=myXML.Goods[i].COC.province//始发地1
+				node.cityCOC=myXML.Goods[i].COC.city//始发地2
+				node.countryCOC=myXML.Goods[i].COC.country//始发地3
+				node.provinceDDU=myXML.Goods[i].DDU.province//目的地1
+				node.cityDDU=myXML.Goods[i].DDU.city//目的地2
+				node.countryDDU=myXML.Goods[i].DDU.country//目的地3
+				node.deliveryDate=myXML.Goods[i].DeliveryDate//送达日期
+				node.contactor=myXML.Goods[i].Contactor//联系  人
+				node.phone=myXML.Goods[i].Phone//联系电话
+				node.remark=myXML.Goods[i].Remark//备注
+				
+				var item:GoodsItem=new GoodsItem();
+				item.x=0;
+				item.y=70*j;
+				item.para=node;
+				this.addElement(item);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="myXML" source="Goods.xml"/>
+	</fx:Declarations>
+</mx:Canvas>

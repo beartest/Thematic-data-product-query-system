@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" 
+		 xmlns:rightpanel="rightpanel.*" creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import mx.events.FlexEvent;			
+			
+			[Bindable]
+			private var _myResult:resultGroup=new resultGroup();
+			public function get myResult():resultGroup
+			{
+				return _myResult;
+			}
+
+			public function set myResult(value:resultGroup):void
+			{
+				_myResult = value;
+			}
+
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				if(_map)
+				{
+					mySearch.map=_map;
+					_myResult.map=_map;
+				}
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				myResult=new resultGroup();
+				myResult.percentHeight=100;
+				myResult.percentWidth=100;
+				resultContent.addElement(myResult);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+
+	<mx:ViewStack id="controlview" width="100%" height="100%" bottom="27">
+		<s:NavigatorContent width="100%" height="100%" label="查询条件">
+			<rightpanel:searchGroup id="mySearch" width="100%" height="100%"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent id="resultContent" width="100%" height="100%" label=" 结果列表">
+		<!--	<rightpanel:resultGroup id="myResult" width="100%" height="100%"/>-->
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	<s:Line left="0" right="0" width="100%" bottom="27">
+		<s:stroke>
+			<s:SolidColorStroke color="#009DFF"/>
+		</s:stroke>
+	</s:Line>
+	<s:TabBar id="myTabBar" left="3" right="3" bottom="3" height="25" width="100%" skinClass="skins.rightpanel.TabBarSkin"
+			  dataProvider="{controlview}" fontFamily="中易黑体" fontSize="14"/>
+</s:Group>

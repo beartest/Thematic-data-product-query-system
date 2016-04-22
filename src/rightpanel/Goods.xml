@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GoodsMessage>
+	<Goods>
+		<ID>HY2015052804508</ID>
+		<Owner>刘先生</Owner>
+		<Type>蔓越莓</Type>
+		<Weight>1.00吨</Weight>
+		<Volume></Volume>
+		<VanType></VanType>
+		<Payment>到付</Payment>
+		<Transport>零担</Transport>
+		<Temperature>
+			-18 到 -13 ℃
+		</Temperature>
+		<Time>2015-05-28 11:29</Time>
+		<ValidityTime>2015-05-29 11:26</ValidityTime>
+		<COC>
+			<province>山东省</province>
+			<city>青岛市</city>
+			<country>黄岛区</country>
+		</COC>
+		<DDU>
+			<province>陕西省</province>
+			<city>西安市</city>
+			<country>西安市</country>
+		</DDU>
+		<DeliveryDate>2015-05-29</DeliveryDate>
+		<Contactor>刘晓鹏</Contactor>
+		<Phone>13001091683</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2015052804506</ID>
+		<Owner>天津冠杨物流</Owner>
+		<Type>冻品</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType></VanType>
+		<Payment>预付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-05-28 09:46</Time>
+		<ValidityTime>2015-05-29 09:34</ValidityTime>
+		<COC>
+			<province>上海市</province>
+			<city>上海辖区</city>
+			<country>浦东新区</country>
+		</COC>
+		<DDU>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>天津冠杨物流</Contactor>
+		<Phone>13001099983</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2011020700203</ID>
+		<Owner>上海颂安冷藏物流</Owner>
+		<Type>低温货物</Type>
+		<Weight>30.00吨</Weight>
+		<Volume></Volume>
+		<VanType>14.7米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2014-10-14 01:14</Time>
+		<ValidityTime>2015-01-29 09:16</ValidityTime>
+		<COC>
+			<province>浙江省</province>
+			<city>金华市</city>
+			<country>市辖区</country>
+		</COC>
+		<DDU>
+			<province>江苏省</province>
+			<city>苏州市</city>
+			<country>平江区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>宋姐</Contactor>
+		<Phone>13001091611</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2011020700203</ID>
+		<Owner>上海颂安冷藏物流</Owner>
+		<Type>低温货物</Type>
+		<Weight>30.00吨</Weight>
+		<Volume></Volume>
+		<VanType>14.7米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2014-10-14 01:14</Time>
+		<ValidityTime>2015-01-29 09:16</ValidityTime>
+		<COC>
+			<province>浙江省</province>
+			<city>金华市</city>
+			<country>市辖区</country>
+		</COC>
+		<DDU>
+			<province>江苏省</province>
+			<city>苏州市</city>
+			<country>襄阳区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>宋姐</Contactor>
+		<Phone>13001091611</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300584</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>水果</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>通州区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300585</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>牛肉</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>通州区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300586</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>海鲜</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>通州区</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300587</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>调料</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300588</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>水产</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300589</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>螃蟹</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300590</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>比目鱼</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300591</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>泥鳅</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300591</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>龙虾</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300592</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>三文鱼</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300593</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>梭子蟹</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300594</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>扇贝</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300595</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>鳕鱼</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300596</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>海螺</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300597</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>香蕉</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300598</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>木瓜</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300599</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>蔬菜</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300600</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>海鳗</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+	<Goods>
+		<ID>HY2013030300601</ID>
+		<Owner>上海惠昌物流</Owner>
+		<Type>里脊</Type>
+		<Weight>28.00吨</Weight>
+		<Volume></Volume>
+		<VanType>9.6米</VanType>
+		<Payment>回单支付</Payment>
+		<Transport>整车</Transport>
+		<Temperature></Temperature>
+		<Time>2015-02-03 14:51</Time>
+		<ValidityTime>2015-03-02 09:18</ValidityTime>
+		<COC>
+			<province>天津市</province>
+			<city>天津辖区</city>
+			<country>南开区</country>
+		</COC>
+		<DDU>
+			<province>北京市</province>
+			<city>北京辖区</city>
+			<country>
+				通州区
+			</country>
+		</DDU>
+		<DeliveryDate></DeliveryDate>
+		<Contactor>艾先生</Contactor>
+		<Phone>1580078088</Phone>
+		<Remark></Remark>
+	</Goods>
+
+</GoodsMessage>

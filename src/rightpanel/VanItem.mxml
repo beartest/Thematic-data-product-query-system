@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="70" creationComplete="init()"
+		 mouseOver="mouseOverHandler(event)" mouseOut="mouseOutHandler(event)"
+		 useHandCursor="true" buttonMode="true" click="clickHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import rightpanel.DashLine;
+			
+			[Bindable]
+			private var _para:van
+			public function get para():van
+			{
+				return _para;
+			}
+			
+			public function set para(value:van):void
+			{
+				_para = value;
+				if(_para)
+				{
+					if(_para.provinceCOC.substr(_para.provinceCOC.length-1,_para.provinceCOC.length)=="市")
+						COCDDUlabel.text=_para.provinceCOC;
+					else
+						COCDDUlabel.text=_para.cityCOC;
+					
+					COCDDUlabel.text=COCDDUlabel.text+" - "
+					if(_para.provinceDDU.substr(_para.provinceDDU.length-1,_para.provinceDDU.length)=="市")
+						COCDDUlabel.text+=_para.provinceDDU;
+					else
+						COCDDUlabel.text+=_para.cityDDU;
+					
+					typelabel.text=_para.type;
+					carrierlabel.text=_para.carrier;
+					if(_para.price!="")
+						pricelabel.text=_para.price;
+					else
+						pricelabel.text="价格待议";
+					timelabel.text=_para.time.substr(0,10);
+				}
+			}
+			
+			private function init():void
+			{ 
+				var myDashLine:DashLine = new DashLine(); 
+				this.addElement(myDashLine.init(0,0xC3C3C3,1,0,70,300,70,1,3,3)); 
+			}   
+			
+			protected function mouseOverHandler(event:MouseEvent):void
+			{
+				currentState='over';
+			}
+			
+			protected function mouseOutHandler(event:MouseEvent):void
+			{
+				currentState='default';
+			}
+			
+			protected function clickHandler(event:MouseEvent):void
+			{
+				var details:VanDetails=new VanDetails();
+				details.para=_para;
+				details.x = (this.parentApplication.width-details.width)/2;
+				details.y = (this.parentApplication.height-details.height)/2;
+				PopUpManager.addPopUp(details,this.parent, true); 
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="over"/>
+	</s:states>
+	
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF" color.over="#eef8fb"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Label id="COCDDUlabel" left="20" top="10" color="#6A6A6C" color.over="#1d59aa"/>
+	<s:Label id="typelabel" left="30" top="30" color="#6A6A6C" color.over="#1d59aa"/>
+	<s:Label id="carrierlabel" left="20" top="50" color="#6A6A6C" color.over="#1d59aa"/>
+	<s:Label id="pricelabel" color="#6A6A6C" right="30" top="10" color.over="#1d59aa"/>
+	<s:Label id="timelabel" right="30" top="50" color="#6A6A6C" color.over="#1d59aa"/>
+</s:Group>

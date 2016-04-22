@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="70" creationComplete="init()"
+		 xmlns:esri="http://www.esri.com/2008/ags">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			import com.esri.ags.Map;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.layers.Layer;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import rightpanel.DashLine;
+			import menuWidgets.query.CoordinateConversion;
+			
+			[Bindable]
+			private var _para:storehouse;
+			public function get para():storehouse
+			{
+				return _para;
+			}
+			
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+			}
+			
+			public function set para(value:storehouse):void
+			{
+				_para = value;
+				if(_para)
+				{
+					namelabel.text=_para.name;
+					arealabel.text=_para.area;
+					temptypelabel.text=_para.tempType;
+					if(_para.ispicture)
+					{
+						image.source="images/storehouse/"+_para.id+".jpg";
+					}
+				}
+			}
+			
+			private function init():void
+			{ 
+				var myDashLine:DashLine = new DashLine(); 
+				this.addElement(myDashLine.init(0,0xC3C3C3,1,0,70,300,70,1,3,3)); 
+			}   
+			
+			protected function mouseOverHandler(event:MouseEvent):void
+			{
+				currentState='over';
+			}
+			
+			protected function mouseOutHandler(event:MouseEvent):void
+			{
+				currentState='default';
+			}
+			
+			protected function clickHandler(event:MouseEvent):void
+			{
+				var details:StorehouseDetails=new StorehouseDetails();
+				details.para=_para;
+				details.x = (this.parentApplication.width-details.width)/2;
+				details.y = (this.parentApplication.height-details.height)/2;
+				PopUpManager.addPopUp(details,this.parent, true); 
+			}
+			
+			protected function GPS_clickHandler(event:MouseEvent):void
+			{
+				if(_map)
+				{
+					var graphic:Graphic = new Graphic(CoordinateConversion.lonLat2Mercator(new MapPoint(_para.lon, _para.lat)),pointSymbol);
+					
+					(_map.getLayer("查询结果图层") as GraphicsLayer).clear();
+					(_map.getLayer("冷库结果图层") as GraphicsLayer).clear();
+					(_map.getLayer("冷库结果图层") as GraphicsLayer).add(graphic);
+					_map.center = graphic.geometry as MapPoint;
+					_map.level = 10;
+				}	
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<esri:PictureMarkerSymbol id="pointSymbol" source="images/details/greenGPS_24.png" />
+	</fx:Declarations>
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="over"/>
+	</s:states>
+	
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF" color.over="#eef8fb"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Group left="0" top="0" width="270" height="100%" mouseOver="mouseOverHandler(event)" mouseOut="mouseOutHandler(event)"
+			 useHandCursor="true" buttonMode="true" click="clickHandler(event)">
+		<s:Rect width="100%" height="100%">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF" color.over="#eef8fb"/>
+			</s:fill>
+		</s:Rect>
+		<s:Image id="image" left="5" top="5" width="80" height="60"
+				 source="images/storehouse/default.jpg"
+				 scaleMode="stretch"/>
+		<s:Label id="namelabel" top="10" left="90" color="#6A6A6C" color.over="#1d59aa"/>
+		<s:Label top="30" left="90" color="#6A6A6C" color.over="#1d59aa" text="面    积："/>
+		<s:Label id="arealabel" top="30" left="150" color="#6A6A6C" color.over="#1d59aa"/>
+		<s:Label top="50" left="90" color="#6A6A6C" color.over="#1d59aa" text="库温类型："/>
+		<s:Label id="temptypelabel" top="50" left="150" color="#6A6A6C" color.over="#1d59aa"/>
+	</s:Group>
+	<s:Group  top="0" right="0" width="50" height="100%" useHandCursor="true" buttonMode="true">
+		<s:Button id="imagebutton" left="0" verticalCenter="0" width="36" height="36" click="GPS_clickHandler(event)"
+				  skinClass="skins.rightpanel.GPSButton"/>
+	</s:Group>
+	
+</s:Group>

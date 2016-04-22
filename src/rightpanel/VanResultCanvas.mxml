@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%" horizontalScrollPolicy="off"
+		   creationComplete="init(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				if(this.numElements==0)
+				{
+					for(var i:Number=0;i<myXML.Van.length();i++)
+					{
+						createnote(i,i);
+					}
+				}
+			}
+			
+			public function additem(formbean:VanFormBean):void
+			{
+				this.removeAllElements();
+				var j:int=0;
+				for(var i:int=0;i<myXML.Van.length();i++)
+				{
+					if(formbean.provinceCOC!=null&&formbean.provinceCOC!=myXML.Van[i].COC.province)
+						continue;
+					if(formbean.cityCOC!=null&&formbean.cityCOC!=myXML.Van[i].COC.city)
+						continue;
+					if(formbean.countryCOC!=null&&formbean.countryCOC!=myXML.Van[i].COC.country)
+						continue;
+					if(formbean.provinceDDU!=null&&formbean.provinceDDU!=myXML.Van[i].DDU.province)
+						continue;
+					if(formbean.cityDDU!=null&&formbean.cityDDU!=myXML.Van[i].DDU.city)
+						continue;
+					if(formbean.countryDDU!=null&&formbean.countryDDU!=myXML.Van[i].DDU.country)
+						continue;
+					if(formbean.type!="不限"&&myXML.Van[i].Type!=null&&formbean.type!=myXML.Van[i].Type)
+						continue;
+					if(formbean.tempType!="不限"&&myXML.Van[i].TempType!=null&&formbean.tempType!=myXML.Van[i].TempType)
+						continue;
+					if(formbean.weight!="不限"&&myXML.Van[i].Weight!=null)
+					{
+						var str1:String=myXML.Van[i].Weight;
+						str1=str1.substr(0,str1.length-1);
+						if(formbean.weight!=">30 吨")
+						{
+							if(formbean.minweight>Number(str1)||formbean.maxweight<Number(str1))
+								continue;
+						}
+						else if(Number(str1)<=60)
+							continue;
+					}
+					if(formbean.volume!="不限"&&myXML.Van[i].Volume!=null)
+					{
+						var str2:String=myXML.Van[i].Volume;
+						str2=str2.substr(0,str2.length-3);
+						if(formbean.volume!=">60 立方米")
+						{
+							if(formbean.minvolume>Number(str2)||formbean.maxvolume<Number(str2))
+								continue;
+						}
+						else if(Number(str2)<=60)
+							continue;
+					}
+					
+					createnote(i,j);
+					j++;		
+				}
+			}
+			
+			private function createnote(i:int,j:int):void
+			{
+				var node:van=new van();//定义goods类
+				
+				node.id=myXML.Van[i].ID	//车源编号
+				node.provinceCOC=myXML.Van[i].COC.province	//起始地1
+				node.cityCOC=myXML.Van[i].COC.city	//起始地2
+				node.countryCOC=myXML.Van[i].COC.country	//起始地3
+				node.provinceDDU=myXML.Van[i].DDU.province	//目的地1
+				node.cityDDU=myXML.Van[i].DDU.city	//目的地2
+				node.countryDDU=myXML.Van[i].DDU.country	//目的地3
+				node.type=myXML.Van[i].Type	//车型
+				node.tempType=myXML.Van[i].TempType	//车辆温别
+				node.minTemp=myXML.Van[i].minTemp	//最低温度
+				node.maxTemp=myXML.Van[i].maxTemp	//最高温度
+				node.weight=myXML.Van[i].Weight	//最大载重
+				node.volume=myXML.Van[i].Volume	//载货立方数
+				node.diameter=myXML.Van[i].Diameter	//箱体内径
+				node.lenght=myXML.Van[i].Lenght	//长
+				node.gps=myXML.Van[i].GPS	//卫星定位信息
+				node.safe=myXML.Van[i].Safe	//车辆货运险
+				node.price=myXML.Van[i].Price	//价格信息
+				node.carrier=myXML.Van[i].Carrier	//承运商
+				node.contactor=myXML.Van[i].Contactor	//联系人
+				node.phone=myXML.Van[i].Phone	//联系电话
+				node.time=myXML.Van[i].Time;   //发布时间
+				
+				var item:VanItem=new VanItem();
+				item.x=0;
+				item.y=70*j;
+				item.para=node;
+				this.addElement(item);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XML id="myXML" source="Van.xml"/>
+	</fx:Declarations>
+</mx:Canvas>
