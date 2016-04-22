@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="33" creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import menuWidgets.draw.drawWidget;
+			import menuWidgets.layers.layersWidget;
+			import menuWidgets.query.queryWidget;
+			import menuWidgets.snap.snapWidget;
+			import menuWidgets.swipe.swipeWidget;
+			import menuWidgets.thematic.thematicWidget;
+			
+			import mx.events.FlexEvent;
+			
+			//标记绘制
+			private var draww:drawWidget = new drawWidget();
+			//图层控制
+			private var layersw:layersWidget = new layersWidget();
+			//地图截图
+			private var snapw:snapWidget=new snapWidget();
+			//地图卷帘
+			private var swipew:swipeWidget=new swipeWidget();
+			//专题地图
+			private var thematicw:thematicWidget=new thematicWidget();
+			//查询检索
+			private var queryw:queryWidget=new queryWidget();
+			
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				
+				if(_map)
+				{
+					queryw.map=map;
+					draww.map=_map;
+					snapw.map=_map;
+					swipew.map=_map;
+					thematicw.map=_map;
+					layersw.map=_map;
+				}
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				draww.controlButton=drawToggleButton;//标记绘制
+				layersw.controlButton=layersToggleButton;//图层控制
+				snapw.controlButton=snapToggleButton;//地图截图
+				swipew.controlButton=swipeToggleButton;//地图卷帘
+				thematicw.controlButton=thematicToggleButton;//专题地图
+				queryw.controlButton=queryToggleButton;//查询检索
+			}
+			
+			//标记绘制
+			protected function draw_clickHandler(event:MouseEvent):void
+			{
+				if(!draww.isPopUp && drawToggleButton.selected)
+					draww.isclose = false;
+				else if(draww.isPopUp && !drawToggleButton.selected)
+					draww.isclose = true;
+			}
+			
+			//图层控制
+			protected function layers_clickHandler(event:MouseEvent):void
+			{
+				if(!layersw.isPopUp && layersToggleButton.selected)
+					layersw.isclose = false;
+				else if(layersw.isPopUp && !layersToggleButton.selected)
+					layersw.isclose = true;
+			}
+			
+			//地图截图
+			protected function snap_clickHandler(event:MouseEvent):void
+			{
+				if(!snapw.isPopUp && snapToggleButton.selected)
+					snapw.isclose=false;
+				else if(snapw.isPopUp &&!snapToggleButton.selected)
+					snapw.isclose=true;
+			}
+			
+			//地图卷帘
+			protected function swipe_clickHandler(event:MouseEvent):void
+			{
+				if(!swipew.isPopUp&& swipeToggleButton.selected)
+					swipew.isclose=false;
+				else if(swipew.isPopUp&&!swipeToggleButton.selected)
+					swipew.isclose=true;
+			}
+			
+			//专题地图
+			protected function thematic_clickHandler(event:MouseEvent):void
+			{
+				if(!thematicw.isPopUp&& thematicToggleButton.selected)
+					thematicw.isclose=false;
+				else if(thematicw.isPopUp&&!thematicToggleButton.selected)
+					thematicw.isclose=true;
+			}
+			
+			
+			//查询检索
+			protected function query_clickHandler(event:MouseEvent):void
+			{
+				if(!queryw.isPopUp&&queryToggleButton.selected)
+					queryw.isclose=false;
+				else if(queryw.isPopUp&&!queryToggleButton.selected)
+					queryw.isclose=true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<!-- 背景-->
+	<s:Rect x="0" y="0" width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="0xf19050"/>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- 按钮 -->
+	<s:HGroup width="100%" height="100%" gap="2" horizontalAlign="left" horizontalCenter="0"
+			  verticalAlign="middle">
+		<s:ToggleButton id="drawToggleButton" height="100%" label="标绘量算"
+						click="draw_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/draw_24.png"/>
+		<s:ToggleButton id="layersToggleButton" height="100%" label="图层列表"
+						click="layers_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/layers_24.png"/>
+		<s:ToggleButton id="snapToggleButton" height="100%" label="地图截图"
+						click="snap_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/snap_24.png"/>
+		<s:ToggleButton id="swipeToggleButton" height="100%" label="地图卷帘"
+						click="swipe_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/swipe_24.png"/>
+		<s:ToggleButton id="thematicToggleButton" height="100%" label="专题地图"
+						click="thematic_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/thematic_24.png"/>
+		<s:ToggleButton id="queryToggleButton" height="100%" label="查询检索"
+					    click="query_clickHandler(event)" skinClass="skins.ToggleButton" icon="images/menu/search_24.png"/>
+	</s:HGroup>
+</s:Group>
