@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="56" height="56"
+		 click="mapswitchover_clickHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			[Bindable]
+			private var _map:Map;
+			public function set map(value:Map):void
+			{
+				_map=value;
+			}
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			protected function mapswitchover_clickHandler(event:MouseEvent):void
+			{
+				if(_map==null)
+				{
+					return;
+				}
+				if(_map.layerIds.indexOf("背景底图")>-1)
+				{
+					_map.removeLayer(_map.getLayer("背景底图"));
+				}
+				if(_map.layerIds.indexOf("背景底图标注")>1)
+				{
+					_map.removeLayer(_map.getLayer("背景底图标注"));
+				}
+				
+				if(maptypelabel.text=="卫星模式")
+				{
+					maptypelabel.text="地图模式";
+					maptypeiamge.source="images/mapswitchover/vectormap.png";
+					var gw:GoogleLayer=new GoogleLayer();
+					gw.url="s@134";
+					gw.id = "背景底图";
+					_map.addLayer(gw,0);
+				}
+				else if(maptypelabel.text=="地图模式")
+				{
+					maptypelabel.text="卫星模式";
+					maptypeiamge.source="images/mapswitchover/imagemap.png";
+					var gd:GoogleLayer=new GoogleLayer();
+					gd.url="m@161000000";
+					gd.id="背景底图";
+					_map.addLayer(gd,0);
+				}
+					
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Rect radiusX="3" radiusY="3" width="100%" height="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="#505050" weight="1" alpha="0.8"/>
+		</s:stroke>
+		<s:fill>
+			<s:SolidColor color="#FFFFFF" alpha="0.3"/>
+		</s:fill>
+	</s:Rect>
+	<s:Image id="maptypeiamge" top="3" bottom="3" left="3" right="3" height="50" width="50" source="images/mapswitchover/imagemap.png" useHandCursor="true"/>
+	<s:Label id="maptypelabel" bottom="0" width="56" height="20" text="卫星模式" verticalAlign="middle" textAlign="center"
+			 color="#505050" backgroundColor="#FFFFFF" backgroundAlpha="0.8"/>
+</s:Group>
