@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark"
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:menuWidgets="menuWidgets.*"
+						  xmlns:drawlabel="menuWidgets.draw.*"
+						  xmlns:esri="http://www.esri.com/2008/ags"
+						  x="50" y="150" width="250" height="350"
+						  skinClass="menuWidgets.CommonWindowSkin"
+						  subtitle="地图点线面标记绘制" title="标记绘制" xmlns:draw1="menuWidgets.draw.*">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			import com.esri.ags.Map;
+			import com.esri.ags.SpatialReference;
+			import com.esri.ags.events.DrawEvent;
+			import com.esri.ags.events.GeometryServiceEvent;
+			import com.esri.ags.events.MapMouseEvent;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.geometry.Geometry;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.geometry.Multipoint;
+			import com.esri.ags.geometry.Polygon;
+			import com.esri.ags.geometry.Polyline;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.symbols.SimpleFillSymbol;
+			import com.esri.ags.symbols.SimpleLineSymbol;
+			import com.esri.ags.symbols.SimpleMarkerSymbol;
+			import com.esri.ags.tasks.supportClasses.AreasAndLengthsParameters;
+			import com.esri.ags.tasks.supportClasses.AreasAndLengthsResult;
+			import com.esri.ags.tasks.supportClasses.CalculationType;
+			import com.esri.ags.tasks.supportClasses.LengthsParameters;
+			import com.esri.ags.tasks.supportClasses.ProjectParameters;
+			import com.esri.ags.tools.DrawTool;
+			import com.esri.ags.tools.EditTool;
+			import com.esri.ags.utils.GeometryUtil;
+			
+			import mx.controls.Alert;
+			import mx.events.ColorPickerEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.Fault;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			import spark.primitives.Line;
+			
+			private var graphicsLayer:GraphicsLayer; //标记绘制图层
+			private var drawTool:DrawTool;
+			private var editTool:EditTool;
+			private var markerSymbol:SimpleMarkerSymbol;
+			private var lineSymbol:SimpleLineSymbol;
+			private var fillSymbol:SimpleFillSymbol;
+			
+			private var graphic:Graphic;//编辑时使用的graphic
+			private var lastEditGraphic:Graphic;//最近一次编辑的graphic
+			private var lastActiveEditTypes:String;//最近一次编辑的方式
+			private var measuregraphic:Graphic;//量算时使用的graphic
+			private var lastMeasureGraphic:Graphic;//最近一次量算的graphic
+			
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				
+				if(_map)
+				{
+					//设置标记绘制图层
+					graphicsLayer = new GraphicsLayer();
+					graphicsLayer.id = "DrawLayer";
+					graphicsLayer.name = "DrawLayer";
+					_map.addLayer(graphicsLayer);
+					
+					drawTool = new DrawTool();
+					drawTool.map = _map;
+					drawTool.graphicsLayer=graphicsLayer;
+					
+					editTool=new EditTool();
+					editTool.map=_map;
+				}
+			}
+
+			protected function setsymbol():void
+			{
+				markerSymbol=new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE,Number(drawwidth.text),drawcolor.selectedColor,drawalpha.value);
+				lineSymbol=new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,drawcolor.selectedColor,drawalpha.value,Number(drawwidth.text));
+				fillSymbol=new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,drawcolor.selectedColor,drawalpha.value,
+					new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,outlinecolor.selectedColor,drawalpha.value,Number(drawwidth.text)));
+				
+				drawTool.markerSymbol=markerSymbol;
+				drawTool.lineSymbol=lineSymbol;
+				drawTool.fillSymbol=fillSymbol;
+				
+				if(editButton.selected&&graphic!=null)
+				{
+					if (graphic.geometry is Polyline)
+						graphic.symbol=lineSymbol;
+					else if(graphic.geometry is Polygon||graphic.geometry is Extent)
+						graphic.symbol=fillSymbol;
+					else if(graphic.geometry is MapPoint)
+						graphic.symbol=markerSymbol;
+					else if(graphic.geometry is Multipoint)
+					{
+						graphic.symbol=markerSymbol;
+					}
+						
+				}
+			}
+			
+			protected function draw():void
+			{		
+				if(drawButton.selected)
+				{
+					if(editButton.selected)
+					{
+						editButton.selected=false;
+						editTool.deactivate();
+						_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+						_map.removeEventListener(KeyboardEvent.KEY_DOWN,deleteKeyShandler);
+						drawtype.enabled=true;
+						graphic=null;
+						lastEditGraphic=null;
+						lastActiveEditTypes = "moveRotateScale";
+						if(drawtype.selectedIndex<4||drawtype.selectedIndex==5)
+							outlinecolor.visible=false;
+						else
+							outlinecolor.visible=true;
+					}
+					if(measureButton.selected)
+					{
+						measureButton.selected=false;
+						_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+						measuregraphic=null;
+						lastMeasureGraphic=null;
+						length.text=null;
+						area.text=null;
+					}
+					
+					//设置显示符号
+					setsymbol();
+					
+					switch(drawtype.selectedIndex)  
+					{  
+						case 0:  
+							drawTool.activate(DrawTool.LINE);  
+							break;  
+						case 1:  
+							drawTool.activate(DrawTool.MAPPOINT);  
+							break;  
+						case 2:  
+							drawTool.activate(DrawTool.MULTIPOINT);  
+							break;        
+						case 3:  
+							drawTool.activate(DrawTool.POLYLINE);  
+							break;  
+						case 4:  
+							drawTool.activate(DrawTool.POLYGON);  
+							break;  
+						case 5:  
+							drawTool.activate(DrawTool.FREEHAND_POLYLINE);  
+							break;  
+						case 6:  
+							drawTool.activate(DrawTool.FREEHAND_POLYGON);  
+							break;  
+						case 7:  
+							drawTool.activate(DrawTool.EXTENT);  
+							break;    
+						case 8:  
+							drawTool.activate(DrawTool.CIRCLE);  
+							break;  
+						case 9:  
+							drawTool.activate(DrawTool.ELLIPSE);  
+							break;  
+					}
+				}
+				else
+				{
+					drawTool.deactivate();
+				}
+			}
+			
+			protected function clear():void
+			{
+				if(graphicsLayer)
+					graphicsLayer.clear();
+				if(editButton.selected)
+				{
+					editButton.selected=false;
+					editTool.deactivate();
+					_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+					_map.removeEventListener(KeyboardEvent.KEY_DOWN,deleteKeyShandler);
+					drawtype.enabled=true;
+					graphic=null;
+					lastEditGraphic=null;
+					lastActiveEditTypes = "moveRotateScale";
+					
+					if(drawtype.selectedIndex<4||drawtype.selectedIndex==5)
+						outlinecolor.visible=false;
+					else
+						outlinecolor.visible=true;
+				}
+				if(measureButton.selected)
+				{
+					measureButton.selected=false;
+					_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+					measuregraphic=null;
+					lastMeasureGraphic=null;
+					length.text=null;
+					area.text=null;
+				}
+			}
+			
+			//更改绘制类型
+			protected function drawtype_changeHandler(event:IndexChangeEvent):void
+			{
+				if(event.newIndex<4||event.newIndex==5)
+					outlinecolor.visible=false;
+				else
+					outlinecolor.visible=true;
+				draw();
+			}
+			
+			
+			//更改绘制颜色
+			protected function drawcolor_changeHandler(event:ColorPickerEvent):void
+			{
+				setsymbol();
+			}
+			
+			//更改绘制点大小及线和面轮廓线粗细
+			protected function drawwidth_changeHandler(event:TextOperationEvent):void
+			{
+				setsymbol();
+			}
+			
+			//更改绘制透明度
+			protected function drawalpha_changeHandler(event:Event):void
+			{
+				setsymbol();
+			}
+			
+			//更改绘制面的轮廓色
+			protected function outlinecolor_changeHandler(event:ColorPickerEvent):void
+			{
+				setsymbol();
+			}
+			
+			protected function edit():void
+			{
+				if(editButton.selected)
+				{
+					if(drawButton.selected)
+					{
+						drawButton.selected=false;
+						drawTool.deactivate();
+					}
+					if(measureButton.selected)
+					{
+						measureButton.selected=false;
+						measuregraphic=null;
+						lastMeasureGraphic=null;
+						length.text=null;
+						area.text=null;
+					}
+					_map.addEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+					_map.addEventListener(KeyboardEvent.KEY_DOWN,deleteKeyShandler);
+					drawtype.enabled=false;
+				}
+				else
+				{
+					editTool.deactivate();
+					_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+					drawtype.enabled=true;
+					
+					if(drawtype.selectedIndex<4||drawtype.selectedIndex==5)
+						outlinecolor.visible=false;
+					else
+						outlinecolor.visible=true;
+				}
+			}
+			
+			private function map_mouseDownHandler(event:MouseEvent):void
+			{
+				event.currentTarget.addEventListener(MouseEvent.MOUSE_MOVE, map_mouseMoveHandler);
+				event.currentTarget.addEventListener(MouseEvent.MOUSE_UP, map_mouseUpHandler);
+			}
+			
+			private function map_mouseMoveHandler(event:MouseEvent):void
+			{
+				event.currentTarget.removeEventListener(MouseEvent.MOUSE_MOVE, map_mouseMoveHandler);
+				event.currentTarget.removeEventListener(MouseEvent.MOUSE_UP, map_mouseUpHandler);
+			}
+			
+			private function map_mouseUpHandler(event:MouseEvent):void
+			{
+				event.currentTarget.removeEventListener(MouseEvent.MOUSE_MOVE, map_mouseMoveHandler);
+				event.currentTarget.removeEventListener(MouseEvent.MOUSE_UP, map_mouseUpHandler);
+				if(event.target==null)
+					return;
+				if(editButton.selected)
+				{//编辑
+					
+					if (event.target is Graphic || event.target.parent is Graphic)
+					{
+						if (event.target is Graphic)
+						{
+							graphic = Graphic(event.target);
+						}
+						else if (event.target.parent is Graphic) 
+						{
+							//MultiPoint,PictureMarkerSymbol
+							graphic = Graphic(event.target.parent);
+						}
+						
+						if (lastEditGraphic !== graphic)
+						{
+							lastEditGraphic = graphic;
+							lastActiveEditTypes = "moveRotateScale";
+						}
+						
+						if (graphic.geometry is Polyline || graphic.geometry is Polygon)
+						{
+							//编辑线段，折线，自由线，多边形，自由面，圆，椭圆
+							
+							//根据选中的graphic设置页面控件
+							if(graphic.geometry is Polyline)
+							{
+								outlinecolor.visible=false;
+								var linesymbol:SimpleLineSymbol=graphic.symbol as SimpleLineSymbol;
+								drawcolor.selectedColor=linesymbol.color;
+								drawwidth.text=linesymbol.width.toString();
+								drawalpha.value=linesymbol.alpha;
+							}
+							else
+							{
+								outlinecolor.visible=true;
+								var polygonsymbol:SimpleFillSymbol= graphic.symbol as SimpleFillSymbol;
+								drawcolor.selectedColor=polygonsymbol.color;
+								outlinecolor.selectedColor=polygonsymbol.outline.color;
+								drawwidth.text=polygonsymbol.outline.width.toString();
+								drawalpha.value=polygonsymbol.alpha;
+							}
+							
+							//activate editTool
+							if (lastActiveEditTypes == "moveEditVertices")
+							{
+								lastActiveEditTypes = "moveRotateScale";
+								editTool.activate(EditTool.MOVE | EditTool.SCALE | EditTool.ROTATE, [ graphic ]);
+							}
+							else
+							{
+								lastActiveEditTypes = "moveEditVertices";
+								editTool.activate(EditTool.MOVE | EditTool.EDIT_VERTICES, [ graphic ]);
+							}
+						}
+						else if (graphic.geometry is Extent)
+						{
+							//编辑矩形
+							outlinecolor.visible=true;
+							var extentsymbol:SimpleFillSymbol= graphic.symbol as SimpleFillSymbol;
+							drawcolor.selectedColor=extentsymbol.color;
+							outlinecolor.selectedColor=extentsymbol.outline.color;
+							drawwidth.text=extentsymbol.outline.width.toString();
+							drawalpha.value=extentsymbol.alpha;
+							editTool.activate(EditTool.MOVE | EditTool.SCALE, [ graphic ]);
+						}
+						else if (graphic.graphicsLayer == graphicsLayer)
+						{
+							//编辑点，多点
+							outlinecolor.visible=false;
+							var pointsymbol:SimpleMarkerSymbol=graphic.symbol as SimpleMarkerSymbol; 
+							drawcolor.selectedColor=pointsymbol.color;
+							drawwidth.text=pointsymbol.size.toString();
+							drawalpha.value=pointsymbol.alpha;
+							
+							editTool.activate(EditTool.MOVE | EditTool.EDIT_VERTICES, [ graphic ]);
+						} 
+					}
+					else
+					{
+						editTool.deactivate();
+						lastActiveEditTypes = "moveRotateScale";
+						graphic=null;
+						lastEditGraphic=null;
+					}
+				}
+				else if(measureButton.selected)
+				{//量算
+					if (event.target is Graphic)
+					{
+						measuregraphic = Graphic(event.target);
+						if(lastMeasureGraphic != measuregraphic)
+						{
+							lastMeasureGraphic=measuregraphic;
+						}
+						if (measuregraphic.geometry is Polyline)
+						{	
+							var lengthsParameters:LengthsParameters=new LengthsParameters();
+							lengthsParameters.calculationType=CalculationType.GEODESIC;
+							lengthsParameters.polylines=[measuregraphic.geometry];
+							geometryService.lengths(lengthsParameters);
+						}
+						else if(measuregraphic.geometry is Polygon)
+						{
+							var polygon:Polygon = (event.target as Graphic).geometry as Polygon;
+							if ( GeometryUtil.polygonSelfIntersecting(polygon))
+							{
+								geometryService.simplify([ polygon ]);
+							}
+							else
+							{
+								projectPolygon(polygon);
+							}
+						}
+						else if(measuregraphic.geometry is Extent)
+						{
+							var epolygon:Polygon =((event.target as Graphic).geometry as Extent).toPolygon();
+							if ( GeometryUtil.polygonSelfIntersecting(epolygon))
+							{
+								geometryService.simplify([ epolygon ]);
+							}
+							else
+							{
+								projectPolygon(epolygon);
+							}
+						}
+					}
+					else
+					{
+						measuregraphic=null;
+						lastMeasureGraphic=null;
+						length.text=null;
+						area.text=null;
+					}
+				}
+				
+			}
+			
+			//编辑模式下删除graphic
+			private function deleteKeyShandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode==Keyboard.DELETE)
+				{
+					if(graphic!=null)
+					{
+						graphicsLayer.remove(graphic);
+						editTool.deactivate();
+					}
+				}
+			}
+		
+			protected function measureButton_clickHandler(event:MouseEvent):void
+			{
+				if(measureButton.selected)
+				{
+					if(drawButton.selected)
+					{
+						drawButton.selected=false;
+						drawTool.deactivate();
+						_map.addEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+					}
+					else if(editButton.selected)
+					{
+						editButton.selected=false;
+						editTool.deactivate();
+						drawtype.enabled=true;
+						graphic=null;
+						lastEditGraphic=null;
+						_map.removeEventListener(KeyboardEvent.KEY_DOWN,deleteKeyShandler);
+						if(drawtype.selectedIndex<4||drawtype.selectedIndex==5)
+							outlinecolor.visible=false;
+						else
+							outlinecolor.visible=true;
+					}
+				}
+				else
+				{
+					_map.removeEventListener(MouseEvent.MOUSE_DOWN,map_mouseDownHandler);
+				}
+			}
+			
+			//长度量算
+			private function lengthsCompleteHandler(event:GeometryServiceEvent):void
+			{
+				var dist:Number = (event.result as Array)[0];
+				var myAttributes:String;
+				if (dist < 3000)
+				{
+					myAttributes = Math.round(dist) + " meters";
+				}
+				else
+				{
+					myAttributes = Number(dist / 1000).toFixed(3) + " km";
+				}
+				length.text=myAttributes;
+			}
+
+			//面积量算
+			private function geometryService_simplifyCompleteHandler(event:GeometryServiceEvent):void
+			{
+				if (event.result)
+				{
+					var polygon:Polygon = (event.result as Array)[0];
+					projectPolygon(polygon);
+				}
+			}
+			
+			private function projectPolygon(polygon:Polygon):void
+			{
+				// project to 54034 (World_Cylindrical_Equal_Area)
+				const projectParameters:ProjectParameters = new ProjectParameters;
+				projectParameters.geometries = [ polygon ];
+				projectParameters.outSpatialReference = new SpatialReference(54034);
+				geometryService.project(projectParameters, new AsyncResponder(project_resultHandler, project_faultHandler, polygon));
+			}
+			
+			private function project_resultHandler(result:Object, token:Object = null):void
+			{
+				if (result)
+				{
+					var polygon:Geometry = (result as Array)[0];
+					var areasAndLengthsParameters:AreasAndLengthsParameters = new AreasAndLengthsParameters();
+					areasAndLengthsParameters.areaUnit = GeometryService.UNIT_SQUARE_KILOMETERS;
+					areasAndLengthsParameters.polygons = [ polygon ];
+					
+					geometryService.areasAndLengths(areasAndLengthsParameters, new AsyncResponder(
+						areasAndLengths_resultHandler, areasAndLengths_faultHandler, token));
+				}
+			}
+			
+			private function project_faultHandler(fault:Fault, token:Object = null):void
+			{
+				Alert.show(fault.faultString + "\n\n" + fault.faultDetail, "project Fault " + fault.faultCode);
+			}
+			
+			private function areasAndLengths_resultHandler(result:AreasAndLengthsResult, token:Object = null):void
+			{
+				const areastring:String = myNumberFormatter.format(result.areas[0]);
+			    area.text = areastring + " km2";
+			}
+			
+			private function areasAndLengths_faultHandler(fault:Fault, token:Object = null):void
+			{
+				Alert.show(fault.faultString + "\n\n" + fault.faultDetail, "areasAndLengths Fault " + fault.faultCode);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<esri:GeometryService id="geometryService"
+							  concurrency="last"
+							  lengthsComplete="lengthsCompleteHandler(event)"
+							  simplifyComplete="geometryService_simplifyCompleteHandler(event)"
+							  showBusyCursor="true"
+							  url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer"/>
+		<s:NumberFormatter id="myNumberFormatter"
+						   fractionalDigits="2"
+						   useGrouping="true"/>
+	</fx:Declarations>
+	<s:VGroup left="5" right="5" top="5" bottom="5" width="100%" height="100%" gap="5">
+		<s:HGroup width="100%">
+			<s:ToggleButton id="drawButton" label="绘制" click="draw()" skinClass="skins.WidgetToggleButton" icon="images/widget/pencil_add.png"/>
+			<s:ToggleButton id="editButton" label="编辑" click="edit()" skinClass="skins.WidgetToggleButton" icon="images/widget/pencil.png"/>
+			<s:Button label="清空" skinClass="skins.WidgetButton" click="clear()" icon="images/widget/pencil_delete.png"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="标记类型：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+				</s:filters>
+			</s:Label>
+			<s:ComboBox id="drawtype" width="120" height="22" skinClass="skins.WidgetComboBox" fontFamily="黑体" fontSize="14" color="#656565" selectedIndex="0" change="drawtype_changeHandler(event)">
+				<s:ArrayCollection>
+					<fx:String>线段</fx:String>  
+					<fx:String>点</fx:String>  
+					<fx:String>多点</fx:String>  
+					<fx:String>折线</fx:String>  
+					<fx:String>多边形</fx:String>  
+					<fx:String>自由线</fx:String>  
+					<fx:String>自由面</fx:String>  
+					<fx:String>矩形</fx:String>     
+					<fx:String>圆</fx:String>  
+					<fx:String>椭圆</fx:String>
+				</s:ArrayCollection>
+			</s:ComboBox>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="标记颜色：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+				</s:filters>
+			</s:Label>
+			<mx:ColorPicker id="drawcolor" selectedColor="#0066FF" change="drawcolor_changeHandler(event)"/>
+			<mx:ColorPicker id="outlinecolor" selectedColor="#FFFFFF" change="outlinecolor_changeHandler(event)" visible="false"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="标记线宽：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+				</s:filters>
+			</s:Label>
+			<s:TextInput id="drawwidth" width="120" height="22" borderColor="0xBCBCBC" fontFamily="黑体" fontSize="14" color="#656565" text="3" restrict="0-9" change="drawwidth_changeHandler(event)"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="透明度：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle" >
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+				</s:filters>
+			</s:Label>
+			<s:HSlider id="drawalpha" maximum="1" minimum="0" stepSize="0.01" value="0.5" width="120" change="drawalpha_changeHandler(event)"/>
+		</s:HGroup>
+		<!-- 分割线 -->
+		<mx:HRule width="100%"  strokeColor="#B2B2B2"/>
+		<s:HGroup width="100%">
+			<s:ToggleButton id="measureButton" label="量算" skinClass="skins.WidgetToggleButton" click="measureButton_clickHandler(event)" icon="images/widget/measure.png"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="长 度：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle" enabled="false" >
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2"/>
+				</s:filters>
+			</s:Label>
+			<drawlabel:LabelBorder id="length" width="120" height="22" color="#656565" fontFamily="黑体" fontSize="14" fontWeight="bold" borderAlpha="1" borderWidth="1" borderColor="0xBCBCBC"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="面 积：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2"/>
+				</s:filters>
+			</s:Label>
+			<drawlabel:LabelBorder id="area" width="120" height="22" borderColor="0xBCBCBC" fontFamily="黑体" fontSize="14" color="#656565" fontWeight="bold" borderAlpha="1" borderWidth="1"/>
+		</s:HGroup>
+	</s:VGroup>
+</menuWidgets:CommonWindow>

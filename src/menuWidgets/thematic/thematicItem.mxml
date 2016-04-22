@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" rollOut="rollOut(event)" rollOver="rollOver(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			import com.esri.ags.events.LayerEvent;
+			import com.esri.ags.layers.Layer;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			
+			[Bindable]
+			public var title:String;//标题
+			[Bindable]
+			public var subtitle:String;//副标题
+			private var _selected:Boolean=false;
+			private var _over:Boolean=false;
+			private var _layer:Layer=new Layer();
+			
+			private var _map:Map;
+			public function set map(value:Map):void
+			{
+				_map=value;
+			}
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			private var _url:String;//地图服务地址
+			public function set url(value:String):void
+			{
+				_url=value;
+			}
+			public function get url():String
+			{
+				return _url;
+			}
+			
+			//地图服务类型
+			private var _layertype:String;
+			public function get layertype():String
+			{
+				return _layertype;
+			}
+			
+			[Inspectable(type="String", enumeration="tiled,dynamic,feature,bing,image,arcims,wms,wmts,osm,kml,csv,georss,webtiled")]
+			public function set layertype(value:String):void
+			{
+				_layertype = value;
+			}
+			
+			
+			//设置图例
+			public function set legend(value:ArrayCollection):void
+			{
+				if(value && value.length>0)
+				{
+					hrule.visible=true;
+					legendgroup.visible=true;
+					legendgroup.removeAllElements();
+					
+					for each(var item:Object in value)
+					{
+						var g:HGroup=new HGroup();
+						
+						var rect:Rect=new Rect();
+						rect.width=10;
+						rect.height=10;
+						rect.stroke=new SolidColorStroke(0xFFFFFF);
+						rect.fill=new SolidColor(uint(item.color));
+						g.addElement(rect);
+						
+						var label:Label=new Label();
+						label.setStyle("fontFamily","黑体");
+						label.setStyle("color","#7B888F");
+						label.setStyle("fontSize",11);
+						label.text=item.label;
+						g.addElement(label);
+						
+						legendgroup.addElement(g);
+					}
+				}
+			}
+
+			protected function rollOver(event:MouseEvent):void
+			{
+				if(_selected)
+				{
+					this.currentState='overandselected';
+				}
+				else
+				{
+					this.currentState='over';
+				}
+			}
+			
+			protected function rollOut(event:MouseEvent):void
+			{
+				if(_selected)
+				{
+					this.currentState='selected';
+				}
+				else
+				{
+					this.currentState='default';
+				}
+			}
+				
+			//点击图片，打开专题图
+			protected function image_clickHandler(event:MouseEvent):void
+			{
+				if(_selected=!_selected)
+				{
+					loader.visible=true;
+					var layerProperty:Object = {url:_url,type:_layertype,label:title,alpha:1.0,visible:true};
+					_layer=LayerCreator.createLayerFromLayerObject(layerProperty);
+					_layer.addEventListener(LayerEvent.LOAD,layer_loaded);
+					_layer.addEventListener(LayerEvent.LOAD_ERROR,layer_loadederror);
+					_map.addLayer(_layer);
+				}
+				else
+				{
+					this.currentState='over';
+					_map.removeLayer(_layer);
+					_layer.removeEventListener(LayerEvent.LOAD,layer_loaded);
+					_layer.removeEventListener(LayerEvent.LOAD_ERROR,layer_loadederror);
+				}
+			}
+			
+			//调节图层透明度
+			protected function hslider_changeHandler(event:Event):void
+			{
+				_layer.alpha=hslider.value;
+			}
+			
+			protected function layer_loaded(event:Event):void
+			{
+				hslider.value = _layer.alpha;
+				loader.visible = false;
+				_map.extent = _layer.initialExtent;
+				_map.level--;
+				this.currentState='overandselected';
+			}
+			protected function layer_loadederror(event:Event):void
+			{
+				loader.visible = false;
+				_selected=false;
+				this.currentState='over';
+				Alert.show(title+" 图层加载错误！");
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="over" stateGroups="overStates"/>
+		<s:State name="selected" stateGroups="selectedStates"/>
+		<s:State name="overandselected" stateGroups="overStates,selectedStates"/>
+	</s:states>
+	
+	<s:Rect left="0" right="0" top="0" bottom="0" alpha="0" radiusX="5"
+			alpha.overStates="1">
+		<s:stroke>
+			<s:SolidColorStroke color="#DEDEDE"/>
+		</s:stroke>
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect left="2" right="2" top="2" bottom="2" alpha="0" radiusX="5"
+			alpha.overStates="1">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="#FFFFFF"/>
+				<s:GradientEntry color="#E3EFF4"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<s:HGroup left="5" right="5" top="5" bottom="5" horizontalAlign="left" verticalAlign="top">
+		<s:Group>
+			<s:Image top="3" buttonMode="true" click="image_clickHandler(event)" horizontalCenter="0"
+					 source="images/widget/notselected.png" toolTip="打开专题图" useHandCursor="true"
+					 visible="true" visible.selectedStates="false"/>
+			<s:Image top="3" buttonMode="true" click="image_clickHandler(event)" horizontalCenter="0"
+					 source="images/widget/selected.png" toolTip="关闭专题图" useHandCursor="true"
+					 visible="false" visible.selectedStates="true"/>
+			<s:SWFLoader id="loader" visible="false" top="25"
+						 source="menuWidgets/thematic/loader.swf"/>
+		</s:Group>
+		<s:VGroup width="100%">
+			<!--标题-->
+			<s:Label width="100%" color="#4E94E2" fontFamily="黑体" fontSize="13" text="{title}"
+					 verticalAlign="middle"/>
+			<s:Label width="100%" color="#7B888F" fontFamily="黑体" fontSize="11" text="{subtitle}"
+					 verticalAlign="middle"/>
+			<!--透明度-->
+			<s:HGroup width="100%">
+				<s:Label color="#999999" fontFamily="黑体" fontSize="11" text="透明度:"
+						 verticalAlign="middle"/>
+				<s:HSlider id="hslider" width="100%" change="hslider_changeHandler(event)"
+						   enabled="false" maximum="1.0" minimum="0" snapInterval="0.01" value="1"
+						   enabled.selectedStates="true"/>
+			</s:HGroup>
+			
+			<!--图例-->
+			<mx:HRule id="hrule" visible="false" width="100%" strokeColor="#FFFFFF"/>
+			<s:TileGroup id="legendgroup" visible="true" width="100%" columnAlign="left"
+						 orientation="columns" rowAlign="top"/>
+		</s:VGroup>
+	</s:HGroup>
+</s:Group>

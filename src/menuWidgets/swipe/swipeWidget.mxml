@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  xmlns:menuWidgets="menuWidgets.*"
+						  xmlns:esri="http://www.esri.com/2008/ags"
+						  x="50" y="150" width="250" height="350" creationComplete="init()"
+						  skinClass="menuWidgets.CommonWindowSkin" 
+						  title="地图卷帘" subtitle="显示/隐藏地图卷帘">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			import com.esri.ags.Map;
+			import com.esri.ags.SpatialReference;
+			import com.esri.ags.events.ExtentEvent;
+			import com.esri.ags.events.MapEvent;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.geometry.Polygon;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.layers.Layer;
+			import com.esri.ags.symbols.SimpleFillSymbol;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import skins.hslider;
+			import skins.vslider;
+			
+			import spark.components.HSlider;
+			import spark.components.VSlider;
+			import spark.events.IndexChangeEvent;
+			
+			[Embed(source="images/widget/we_cursor.png")]
+			private var imagecursor:Class;
+			
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				if(_map && layersGroup1 != null&&layersGroup2 != null)
+				{
+					reBuildLayerList();
+				}
+			}
+			
+			private var masklayer:GraphicsLayer=new GraphicsLayer();
+			private var hslider:HSlider=new HSlider(); 
+			private var vslider:VSlider=new VSlider();
+			
+			protected function init():void
+			{
+				if(_map && layersGroup1.numElements == 0&&layersGroup2.numElements == 0)
+				{
+					reBuildLayerList();
+					
+					hslider.id="hslider";
+					hslider.x=_map.localToGlobal(new Point(0,0)).x;
+					hslider.y=_map.localToGlobal(new Point(0,0)).y;
+					hslider.width=_map.width;
+					hslider.height=_map.height;
+					hslider.minimum=0;
+					hslider.maximum=1000;
+					hslider.stepSize=0.001;
+					hslider.showDataTip=false;
+					hslider.value = hslider.maximum/2;
+					hslider.setStyle("skinClass",Class(skins.hslider));
+					
+					vslider.id="vslider";
+					vslider.x=_map.localToGlobal(new Point(0,0)).x;
+					vslider.y=_map.localToGlobal(new Point(0,0)).y;
+					vslider.width=_map.width;
+					vslider.height=_map.height;
+					vslider.minimum=0;
+					vslider.maximum=1000;
+					vslider.stepSize=0.001;
+					vslider.showDataTip=false;
+					vslider.value = vslider.maximum/2;
+					vslider.setStyle("skinClass",Class(skins.vslider));
+					
+					_map.addEventListener(ExtentEvent.EXTENT_CHANGE,map_extentChangeHandler);
+					masklayer.id="遮罩图层";
+					map.addLayer(masklayer);
+				}
+			}
+			
+			private function reBuildLayerList():void//根据层列表创建一组checkbox添加进group
+			{
+				if(layersGroup1)//控制图层
+				{
+					layersGroup1.removeAllElements();
+					for each (var l1:Layer in _map.layers) 
+					{
+						if(l1 is GraphicsLayer)
+							continue;
+						
+						var swipeitem1:swipeItem = new swipeItem();
+						swipeitem1.layerCheck.label=l1.id;
+						swipeitem1.layerCheck.addEventListener(Event.CHANGE,layerCheck_changeHandler);
+						
+						layersGroup1.addElement(swipeitem1);
+					}
+				}
+				if(layersGroup2)//卷帘图层
+				{
+					layersGroup2.removeAllElements();
+					for each (var l2:Layer in _map.layers) 
+					{
+						if(l2 is GraphicsLayer)
+							continue;
+						
+						var swipeitem2:swipeItem = new swipeItem();
+						swipeitem2.layerCheck.label = l2.id;
+						swipeitem2.layerCheck.addEventListener(Event.CHANGE,layerCheck_changeHandler);
+						
+						layersGroup2.addElement(swipeitem2);
+					}
+				}
+			}
+			
+			protected function swipe_clickHandler(event:MouseEvent):void//显示隐藏卷帘按钮事件
+			{
+				if(swipe.selected)
+				{
+					swipe.content="隐藏卷帘";
+					if(swipetype.selectedItem=="垂直模式")
+					{
+						hslider.value = hslider.maximum/2;
+						_map.parentApplication.addElement(hslider);
+						hslider.addEventListener(Event.CHANGE, slider_changeHandler);
+					}
+					else if(swipetype.selectedItem=="水平模式")
+					{
+						vslider.value = vslider.maximum/2;
+						_map.parentApplication.addElement(vslider);
+						vslider.addEventListener(Event.CHANGE, slider_changeHandler);
+					}
+					buildmask();//创建遮罩
+				}
+				else
+				{
+					swipe.content="显示卷帘";
+					
+					if(_map.parentApplication.contains(hslider))
+					{
+						
+						_map.parentApplication.removeElement(hslider);
+						hslider.removeEventListener(Event.CHANGE, slider_changeHandler);
+					}
+					else if(_map.parentApplication.contains(vslider))
+					{
+						_map.parentApplication.removeElement(vslider);
+						vslider.removeEventListener(Event.CHANGE, slider_changeHandler);
+					}
+					removemask();
+				}
+			}
+			
+			protected function swipetype_changeHandler(event:IndexChangeEvent):void//卷帘类型选择
+			{
+				if(_map.parentApplication.contains(hslider))
+				{
+					_map.parentApplication.removeElement(hslider);
+					hslider.removeEventListener(Event.CHANGE, slider_changeHandler);
+					vslider.value = vslider.maximum/2;
+					_map.parentApplication.addElement(vslider);
+					vslider.addEventListener(Event.CHANGE, slider_changeHandler);
+					buildmask();//创建遮罩
+					
+				}
+				else if(_map.parentApplication.contains(vslider))
+				{
+					_map.parentApplication.removeElement(vslider);
+					vslider.removeEventListener(Event.CHANGE, slider_changeHandler);
+					hslider.value = hslider.maximum/2;
+					_map.parentApplication.addElement(hslider);
+					hslider.addEventListener(Event.CHANGE, slider_changeHandler);
+					buildmask();//创建遮罩
+				}
+			}
+			
+			private function slider_changeHandler(event:Event):void//滑动条滑动事件
+			{
+				buildmask();
+			}
+			
+			private function buildmask():void//设置遮罩
+			{
+				if(layersGroup1&&layersGroup2)
+				{	
+					masklayer.clear();
+					for (var i:int = 0; i < layersGroup1.numElements; i++) 
+					{
+						//获取控制图层和卷帘图层的一组对应项
+						var item1:swipeItem =layersGroup1.getElementAt(i) as swipeItem;
+						var item2:swipeItem =  layersGroup2.getElementAt(i) as swipeItem;
+						
+						for each (var l:String in map.layerIds) 
+						{
+							if(item1.layerCheck.label == l)
+							{
+								var itemlayer:Layer = map.getLayer(l);
+								var l_mask:Graphic=new Graphic();
+								var hvalue:Number=(hslider.value-hslider.minimum)*(map.extent.xmax-map.extent.xmin)/(hslider.maximum-hslider.minimum)+map.extent.xmin;
+								var vvalue:Number=(vslider.value-vslider.minimum)*(map.extent.ymax-map.extent.ymin)/(vslider.maximum-vslider.minimum)+map.extent.ymin;
+								var myPolygon:Polygon = new Polygon();
+								
+								if(item1.layerCheck.selected&&!item2.layerCheck.selected)
+								{
+									if(_map.parentApplication.contains(hslider))//左侧遮罩
+									{
+										myPolygon=new Polygon(
+											[[
+												new MapPoint(map.extent.xmin,map.extent.ymin),
+												new MapPoint(hvalue,map.extent.ymin),
+												new MapPoint(hvalue,map.extent.ymax),
+												new MapPoint(map.extent.xmin,map.extent.ymax),
+												new MapPoint(map.extent.xmin,map.extent.ymin)
+											]], new SpatialReference(102100));
+									}
+									else if(_map.parentApplication.contains(vslider))//上方遮罩
+									{
+										myPolygon=new Polygon(
+											[[
+												new MapPoint(map.extent.xmin,vvalue),
+												new MapPoint(map.extent.xmax,vvalue),
+												new MapPoint(map.extent.xmax,map.extent.ymax),
+												new MapPoint(map.extent.xmin,map.extent.ymax),
+												new MapPoint(map.extent.xmin,vvalue)
+											]], new SpatialReference(102100));
+									}
+								}
+								else if(!item1.layerCheck.selected&&item2.layerCheck.selected)
+								{
+									if(_map.parentApplication.contains(hslider))//右侧遮罩
+									{
+										myPolygon=new Polygon(
+											[[
+												new MapPoint(hvalue,map.extent.ymin),
+												new MapPoint(map.extent.xmax,map.extent.ymin),
+												new MapPoint(map.extent.xmax,map.extent.ymax),
+												new MapPoint(hvalue,map.extent.ymax),
+												new MapPoint(hvalue,map.extent.ymin)
+											]], new SpatialReference(102100));
+									}
+									else if(_map.parentApplication.contains(vslider))//下方遮罩
+									{
+										myPolygon=new Polygon(
+											[[
+												new MapPoint(map.extent.xmin,map.extent.ymin),
+												new MapPoint(map.extent.xmax,map.extent.ymin),
+												new MapPoint(map.extent.xmax,vvalue),
+												new MapPoint(map.extent.xmin,vvalue),
+												new MapPoint(map.extent.xmin,map.extent.ymin),
+											]], new SpatialReference(102100));
+									}
+								}
+								else if(item1.layerCheck.selected&&item2.layerCheck.selected)
+								{
+									itemlayer.mask=null;
+									break;
+								}
+								l_mask.geometry = myPolygon;
+								l_mask.symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, 0xFF0000, 0);//设置透明度为0的符号样式
+								masklayer.add(l_mask);						
+								itemlayer.mask=l_mask;
+							}
+						}	
+					}
+				} 
+			}	
+			
+			private function removemask():void//去除遮罩
+			{
+				for each (var layer:Layer in map.layers) 
+				{	
+					layer.mask=null;//清空层遮罩
+				}
+			}
+			
+			private function layerCheck_changeHandler(event:Event):void//控制图层
+			{
+				//当存在滑动条时创建遮罩
+				if(_map.parentApplication.contains(hslider)||_map.parentApplication.contains(vslider))
+					buildmask();
+			}
+			
+			private function map_extentChangeHandler(event:ExtentEvent):void
+			{
+				//当存在滑动条时创建遮罩
+				if(_map.parentApplication.contains(hslider)||_map.parentApplication.contains(vslider))
+					buildmask();
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void//重置卷帘按钮事件
+			{
+				hslider.value = hslider.maximum/2;//滑动条置中
+				vslider.value = vslider.maximum/2;//滑动条置中
+				reBuildLayerList();//重置层列表
+				masklayer.clear();//清空遮罩图层
+				buildmask(); //创建遮罩
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:VGroup top="5" right="5" left="5" bottom="5"
+			  width="100%" height="100%">
+		
+		<s:Group width="100%" height="67">
+			<s:VGroup top="3" left="5" width="100%" height="100%">
+				<s:HGroup width="100%" >
+					<s:ToggleButton id="swipe" label="显示卷帘" click="swipe_clickHandler(event)" skinClass="skins.WidgetToggleButton" icon="images/widget/split_h.png"/>	
+					<s:Button label="重置卷帘" click="button1_clickHandler(event)" skinClass="skins.WidgetButton" icon="images/widget/split_v.png"/>
+				</s:HGroup>		
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="10" />
+					<s:Label text="卷帘类型：" width="80" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+						<s:filters>
+							<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+						</s:filters>
+					</s:Label>
+					<s:ComboBox id="swipetype" width="120" height="22" skinClass="skins.WidgetComboBox"
+								change="swipetype_changeHandler(event)" openOnInput="false"
+								selectedIndex="0" fontFamily="黑体" fontSize="14" color="#656565" >
+						<s:ArrayCollection>
+							<fx:String>垂直模式</fx:String>
+							<fx:String>水平模式</fx:String>
+						</s:ArrayCollection>
+					</s:ComboBox>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Group>
+		
+		<s:Group width="100%" height="50%">
+			<s:Group id="borderGroupMask1" left="0" right="0" top="0" bottom="0">   
+				<s:Rect left="0" width="16" top="0" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect> 
+				<s:Rect left="16" width="48" top="10" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect>  
+				<s:Rect left="64" width="100%" top="0" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect>   
+			</s:Group>  
+			<s:Rect right="0" top="5" left="0" bottom="0" radiusX="2" mask="{borderGroupMask1}">
+				<s:stroke>
+					<s:SolidColorStroke color="#999999" />
+				</s:stroke>
+			</s:Rect>
+			<s:Label top="0" left="20" width="40" height="10" text="控制图层" maxDisplayedLines="1" fontFamily="宋体" color="#333333" fontSize="10"/>
+			<s:Scroller width="100%" height="100%"
+						right="5" top="10" left="5" bottom="5">
+				<s:VGroup id="layersGroup1" top="3" left="10" right="10" width="100%" height="100%">
+				</s:VGroup>
+			</s:Scroller>
+		</s:Group>
+		
+		<s:Group width="100%" height="50%">
+			<s:Group id="borderGroupMask2" left="0" right="0" top="0" bottom="0">   
+				<s:Rect left="0" width="16" top="0" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect> 
+				<s:Rect left="16" width="48" top="10" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect>  
+				<s:Rect left="64" width="100%" top="0" bottom="0">   
+					<s:fill>   
+						<s:SolidColor color="#ff0000" alpha="1"/>   
+					</s:fill>   
+				</s:Rect>   
+			</s:Group>  
+			<s:Rect right="0" top="5" left="0" bottom="0" radiusX="2" mask="{borderGroupMask2}">
+				<s:stroke>
+					<s:SolidColorStroke color="#999999" />
+				</s:stroke>
+			</s:Rect>
+			<s:Label top="0" left="20" width="40" height="10" text="卷帘图层" maxDisplayedLines="1" fontFamily="宋体" color="#333333" fontSize="10"/>
+			<s:Scroller width="100%" height="100%"
+						right="5" top="10" left="5" bottom="5">
+				<s:VGroup id="layersGroup2" top="3" left="10" right="10" width="100%" height="100%">
+				</s:VGroup>
+			</s:Scroller>
+		</s:Group>
+	</s:VGroup>
+	
+</menuWidgets:CommonWindow>

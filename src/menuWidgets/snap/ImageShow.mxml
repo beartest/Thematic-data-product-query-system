@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var _bitmap:Bitmap;
+			public function get bitmap():Bitmap
+			{
+				return _bitmap;
+			}
+			public function set bitmap(value:Bitmap):void
+			{
+				_bitmap = value;
+				
+				if(_bitmap)
+				{
+					this.width=_bitmap.width+40;
+					this.height=_bitmap.height+40;
+				}
+			}
+			
+			protected function close_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:RectangularDropShadow left="0" right="0" top="0" bottom="0" alpha="0.3" 
+							 angle="90" blurX="20" blurY="20" color="0x000000" distance="10"
+							 tlRadius="10" trRadius="10" blRadius="10" brRadius="10"/>
+	
+	<s:Rect width="100%" height="100%" radiusX="10">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0.4"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Image source="{_bitmap}" alpha="1" verticalAlign="middle" horizontalAlign="center" horizontalCenter="0" verticalCenter="0"/>
+	
+	<s:Image id="close" right="1" top="1"
+			 buttonMode="true" source="images/widget/closeimage.png" useHandCursor="true" click="close_clickHandler(event)">
+		<s:filters>
+			<s:GlowFilter alpha="1" color="0xFFFFFF"/>
+		</s:filters>
+	</s:Image>
+</s:Group>

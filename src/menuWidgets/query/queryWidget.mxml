@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:menuWidgets="menuWidgets.*" 
+						  x="50" y="150" width="250" height="350"
+						  skinClass="menuWidgets.CommonWindowSkin"
+						  subtitle="信息综合查询与检索" title="查询/检索"
+                          xmlns:query="menuWidgets.query.*">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			
+			import menuWidgets.query.BaiduServices;
+			
+			import mx.collections.ArrayCollection;
+			import mx.rpc.xml.SimpleXMLDecoder;
+			
+			private var resultObject:ResultObject = new ResultObject();
+			private var url:String ="http://api.map.baidu.com/place/v2/search";//请求的url
+			private var baiduservice:BaiduServices = new BaiduServices();
+			
+			private var _map:Map;
+			
+			public function get map():Map
+			{
+				return _map;
+			}
+
+			public function set map(value:Map):void
+			{
+				_map = value;
+			}
+			
+			protected function query(event:MouseEvent):void
+			{
+				var queryUrl:String = url + "?ak=" + BaiduServices.AK 
+					+ "&output=xml&query=" + queryText.text 
+					+ "&page_size=10&page_num=0&scope=1" 
+					+ "&region=" + region.selectedItem;
+				
+				queryBtn.visible = false;
+				loading.visible = true;
+				baiduservice.gotoConn(queryUrl, completefunction);
+			}
+			
+			private function completefunction(e:Event):void
+			{
+				var loader:URLLoader = e.target as URLLoader;
+				var xmlDoc:XMLDocument = new XMLDocument(loader.data);
+				var decoder:SimpleXMLDecoder = new SimpleXMLDecoder(true);
+				var obj:Object = decoder.decodeXML(xmlDoc);
+				
+				resultObject.message = obj.PlaceSearchResponse.message;
+				resultObject.status = obj.PlaceSearchResponse.status;
+				resultObject.total = (obj.PlaceSearchResponse.total==""?0:obj.PlaceSearchResponse.total);
+				
+				navPager.totalCount = resultObject.total;
+				
+				if(resultObject.status == 0)
+				{
+					try
+					{
+						resultObject.results = obj.PlaceSearchResponse.results.result as ArrayCollection;
+						//将数据放在界面上
+						resultGroup.removeAllElements();
+						for each (var item:Object in resultObject.results) 
+						{
+							var qri:queryResultItem = new queryResultItem();
+							qri.data = item;
+							qri.map = _map;
+							resultGroup.addElement(qri);
+						}
+					} 
+					catch(error:Error) 
+					{
+						
+					}
+				}
+				else
+				{
+					resultGroup.removeAllElements();
+					var qri_err:queryResultItem = new queryResultItem();
+					qri_err.data = {name:"查询失败"};
+					resultGroup.addElement(qri_err);
+				}
+				
+				loading.visible = false;
+				queryBtn.visible = true;
+			}
+			
+			protected function navPager_navPagerEventHandler(event:NavPageIndexChange):void
+			{
+				var queryUrl:String = url + "?ak=" + BaiduServices.AK 
+					+ "&output=xml&query=" + queryText.text 
+					+ "&page_size=10&page_num="+ (event.pageIndex-1) +"&scope=1" 
+					+ "&region=" + region.selectedItem;
+				
+				baiduservice.gotoConn(queryUrl, function(e:Event):void
+				{
+					var loader:URLLoader = e.target as URLLoader;
+					var xmlDoc:XMLDocument = new XMLDocument(loader.data);
+					var decoder:SimpleXMLDecoder = new SimpleXMLDecoder(true);
+					var obj:Object = decoder.decodeXML(xmlDoc);
+					
+					if(resultObject.status == 0)
+					{
+						try
+						{
+							resultObject.results = obj.PlaceSearchResponse.results.result as ArrayCollection;
+							//将数据放在界面上
+							resultGroup.removeAllElements();
+							for each (var item:Object in resultObject.results) 
+							{
+								var qri:queryResultItem = new queryResultItem();
+								qri.data = item;
+								qri.map = _map;
+								resultGroup.addElement(qri);
+							}
+						} 
+						catch(error:Error) 
+						{
+							
+						}
+					}
+				});
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<s:ArrayList id="placedata">
+			<fx:String>北京市</fx:String>
+			<fx:String>天津市</fx:String>
+			<fx:String>上海市</fx:String>
+			<fx:String>广州市</fx:String>
+			<fx:String>重庆市</fx:String>
+			<fx:String>成都市</fx:String>
+		</s:ArrayList>
+	</fx:Declarations>
+	
+	<s:VGroup top="5" right="5" left="5" bottom="5"
+			  width="100%" height="100%">
+		<!-- 查询 -->
+		<s:Group width="100%">
+			<s:VGroup top="3" left="5" width="100%">
+				<s:HGroup width="100%" >
+					<s:TextInput id="queryText" width="140" height="28" borderColor="0xBCBCBC" fontFamily="黑体" fontSize="14" color="#656565" />
+					<s:Group>
+						<s:Button id="queryBtn" label="查询" skinClass="skins.WidgetButton"
+								  icon="images/widget/query.png" click="query(event)" />
+						<s:SWFLoader id="loading" source="menuWidgets/thematic/loader.swf" visible="false"
+									 verticalCenter="0" horizontalCenter="0"/>
+					</s:Group>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label text="查询区域：" width="75"
+							 maxDisplayedLines="1" fontFamily="黑体" color="#0C2D45" alpha="0.7"
+							 verticalAlign="middle" fontSize="13"  textAlign="center">
+						<s:filters>
+							<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+						</s:filters>
+					</s:Label>
+					<s:ComboBox id="region"  width="130" height="22" openOnInput="false" selectedIndex="0" 
+								skinClass="skins.WidgetComboBox" fontFamily="黑体" fontSize="14" color="#656565" 
+								dataProvider="{placedata}">
+					</s:ComboBox>
+				</s:HGroup>
+				
+			</s:VGroup>
+		</s:Group>
+		
+		<!-- 分割线 -->
+		<mx:HRule width="100%"  strokeColor="#B2B2B2" />
+		
+		<!-- 查询结果 -->
+		<s:Scroller id="previewScroller" width="100%" height="100%" >
+			<s:Group width="100%" height="100%">
+				<s:VGroup id="resultGroup" top="3" left="5" width="100%" height="100%">
+					
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+		
+		<!-- 分割线 -->
+		<mx:HRule width="100%"  strokeColor="#B2B2B2" />
+		
+		<!-- 分页 -->
+		<query:NavPager id="navPager" width="100%"
+						navPagerEvent="navPager_navPagerEventHandler(event)"/>
+	</s:VGroup>
+</menuWidgets:CommonWindow>

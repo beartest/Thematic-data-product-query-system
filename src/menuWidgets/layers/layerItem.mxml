@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="25" verticalAlign="middle">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.layers.Layer;
+			
+			[Bindable]
+			private var _layer:Layer;
+			public function set layer(value:Layer):void
+			{
+				_layer=value;
+			}
+			public function get layer():Layer
+			{
+				return _layer;
+			}
+			
+			//控制图层显示隐藏
+			protected function layerCheckBox_changeHandler(event:Event):void
+			{
+				_layer.visible=layerCheckBox.selected;
+			}
+			
+			//改变图层透明度
+			protected function layerHSlider_changeHandler(event:Event):void
+			{
+				_layer.alpha=layerHSlider.value;
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:CheckBox id="layerCheckBox" width="80" change="layerCheckBox_changeHandler(event)"
+				selected="{_layer.visible}" skinClass="skins.WidgetCheckBox"/>
+	<s:Spacer width="10"/>
+	<s:HSlider id="layerHSlider" width="100%" change="layerHSlider_changeHandler(event)" maximum="1" minimum="0" snapInterval="0.01" value="{_layer.alpha}"/>
+</s:HGroup>

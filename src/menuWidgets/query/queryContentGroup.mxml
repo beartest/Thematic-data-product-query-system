@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 implements="mx.core.IDataRenderer">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			private var _data:Object;
+			
+			[Bindable]
+			public function get data():Object
+			{
+				return _data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				_data = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<!-- 背景 -->
+	<s:Rect right="5" top="0" left="5" bottom="5">
+		<s:fill>
+			<s:SolidColor color="#ffffff" />
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke color="#D1D1D1" />
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Scroller width="180" height="150"
+				right="10" top="5" left="10" bottom="10">
+		<s:VGroup width="100%" height="100%" fontFamily="黑体"
+				  >
+			<s:HGroup id="Name_Group" width="100%">
+				<s:Label text="名称：" color="#728188"/>
+				<s:Label id="Name" text="{data.name}" width="100%"/>
+			</s:HGroup>
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="#D1D1D1" />
+				</s:stroke>
+			</s:Line>
+			<s:HGroup id="address_Code" width="100%">
+				<s:Label text="地址：" color="#728188"/>
+				<s:Label id="Code" text="{data.address}" width="100%"/>
+			</s:HGroup>
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="#D1D1D1" />
+				</s:stroke>
+			</s:Line>
+			<s:HGroup id="telephone_Area" width="100%">
+				<s:Label text="电话：" color="#728188"/>
+				<s:Label id="Area" text="{data.telephone}" width="100%"/>
+			</s:HGroup>
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="#D1D1D1" />
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+	</s:Scroller>
+</s:Group>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" rollOut="rollOut(event)" rollOver="rollOver(event)"
+		 click="mouseClick(event)"  xmlns:esri="http://www.esri.com/2008/ags">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			import com.esri.ags.Map;
+			import com.esri.ags.components.ContentNavigator;
+			import com.esri.ags.events.LayerEvent;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.layers.Layer;
+			import com.esri.ags.symbols.SimpleMarkerSymbol;
+			
+			import menuWidgets.query.CoordinateConversion;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import spark.filters.GlowFilter;
+			
+			private var contentNavigator:ContentNavigator = new ContentNavigator();
+			private var glow:GlowFilter = new GlowFilter(0x333333,0.6,4,4,1);
+				
+			protected function mouseClick(event:MouseEvent):void
+			{
+				if(_map == null)
+				{
+					return;
+				}
+				
+				var graphic:Graphic = new Graphic(CoordinateConversion.lonLat2Mercator(new MapPoint(_data.location.lng, _data.location.lat)),
+					new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 0, 0, 0, 0, 0, 0,null),_data);
+				
+				(_map.getLayer("冷库结果图层") as GraphicsLayer).clear();
+				(_map.getLayer("查询结果图层") as GraphicsLayer).clear();
+				(_map.getLayer("查询结果图层") as GraphicsLayer).add(graphic);
+				
+				contentNavigator.dataProvider = new ArrayList([ graphic ]);
+				_map.infoWindowContent = contentNavigator;
+				_map.infoWindow.filters = [ glow ];
+				_map.infoWindow.contentOwner = graphic
+				_map.infoWindow.show(graphic.geometry as MapPoint);
+				
+				_map.center = graphic.geometry as MapPoint;
+				_map.level = 15;	
+			}
+			protected function rollOut(event:MouseEvent):void
+			{
+				this.currentState = null;
+			}
+			protected function rollOver(event:MouseEvent):void
+			{
+				this.currentState = "over";
+			}
+
+			[Bindable]
+			private var _data:Object;
+			public function get data():Object
+			{
+				return _data;
+			}
+			public function set data(value:Object):void
+			{
+				_data = value;
+			}
+			
+			//地图属性
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<!-- fill layer 1 -->
+	<s:Rect left="1" right="1" top="1" bottom="1" alpha="0" radiusX="2"
+			alpha.over="1">
+		<s:stroke>
+			<s:SolidColorStroke color="#DEDEDE"/>
+		</s:stroke>
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:HGroup left="5" right="5" top="5" bottom="5" horizontalAlign="left" verticalAlign="top">
+		<s:Group>
+			<s:Image top="3" buttonMode="true"
+					 horizontalCenter="0" source="images/widget/checkenable.png"
+					 />
+		</s:Group>
+		<s:VGroup width="100%">
+			<s:Label width="100%" color="#4E94E2" fontFamily="黑体" fontSize="13"
+					 text="{_data.name}" verticalAlign="middle"/>
+			
+			<s:HGroup width="100%">
+				<s:Label color="#7B888F" fontFamily="黑体" fontSize="11" text="地址："
+						 verticalAlign="middle"/>
+				<s:Label width="100%" color="#7B888F" fontFamily="黑体" fontSize="11" text="{_data.address}"
+						 verticalAlign="middle"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label color="#7B888F" fontFamily="黑体" fontSize="11" text="电话："
+						 verticalAlign="middle"/>
+				<s:Label width="100%" color="#7B888F" fontFamily="黑体" fontSize="11" text="{_data.telephone}"
+						 verticalAlign="middle"/>
+			</s:HGroup>
+			
+			<s:Spacer height="1" />
+		</s:VGroup>
+	</s:HGroup>
+	
+	<!-- 分割线 -->
+	<mx:HRule id="rule" bottom="0" width="100%" strokeColor="#DEDEDE"/>
+</s:Group>

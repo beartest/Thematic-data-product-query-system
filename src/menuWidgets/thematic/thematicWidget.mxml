@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:menuWidgets="menuWidgets.*"
+						  xmlns:esri="http://www.esri.com/2008/ags"
+						  x="50" y="150" width="250" height="350"
+						  skinClass="menuWidgets.CommonWindowSkin" 
+						  title="专题地图" subtitle="专题地图信息展示" xmlns:thematic="menuWidgets.thematic.*">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			import com.esri.ags.tasks.supportClasses.LengthsParameters;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map=value;
+			}
+			
+			[Bindable]
+			private var marketLegend:ArrayCollection=new ArrayCollection([
+				{label:"王顶堤水产批发市场",color:"0xffbebe"}
+			]);
+			
+			//2014年全国七大区域冷藏车保有量
+			[Bindable]
+			private var vanNumberRegionLegend:ArrayCollection=new ArrayCollection([
+				{label:"西北地区 378辆",color:"0xffb1a8"},
+				{label:"华南地区 1087辆",color:"0xff9787"},
+				{label:"东北地区 1240辆",color:"0xfc806a"},
+				{label:"西南地区 1945辆",color:"0xf5654c"},
+				{label:"华中地区 5754辆",color:"0xf04e35"},
+				{label:"华北地区 6023辆",color:"0xe6321e"},
+				{label:"华东地区 13027辆",color:"0xdb0000"}
+			]);
+			
+			//2014年全国七大区域冷库密度
+			[Bindable]
+			private var storeRegionLegend:ArrayCollection=new ArrayCollection([
+				{label:"西北地区",color:"0x38a800"},
+				{label:"西南地区",color:"0x6fc400"},
+				{label:"东北地区",color:"0xb0e000"},
+				{label:"华北地区",color:"0xffff00"},
+				{label:"华南地区",color:"0xffaa00"},
+				{label:"华中地区",color:"0xff5500"},
+				{label:"华东地区",color:"0xff0000"}
+			]);
+			
+			//2014年各省冷库保有量
+			[Bindable]
+			private var storeNumberLegend:ArrayCollection=new ArrayCollection([
+				{label:"数据缺失",color:"0xffffff"},
+				{label:"1 - 161997",color:"0xdce8fa"},
+				{label:"161998 - 225000",color:"0xa8d2f7"},
+				{label:"225001 - 291832",color:"0x9abef5"},
+				{label:"291833 - 427638",color:"0x79aaf2"},
+				{label:"427639 - 744549",color:"0x5a95ed"},
+				{label:"744550 - 1137691",color:"0x3b81eb"},
+				{label:"1137692 - 1917048",color:"0x1e6fe8"},
+				{label:"1917049 - 3204274",color:"0x005ce6"}
+			]);
+			
+			//2014年各省冷藏车保有量
+			[Bindable]
+			private var vanNumberLegend:ArrayCollection=new ArrayCollection([
+				{label:"数据缺失",color:"0xffffff"},
+				{label:"1 - 45",color:"0xfff5d6"},
+				{label:"46 - 186",color:"0xffdba6"},
+				{label:"187 - 563",color:"0xffc299"},
+				{label:"564 - 1129",color:"0xff8769"},
+				{label:"1130 - 8736",color:"0xff1c1c"}
+			]);
+			
+			[Bindable]
+			private var peopleLegend:ArrayCollection = new ArrayCollection([
+				{label:"0-14岁",color:"0x57CBF2"},
+				{label:"15-64岁",color:"0xFF73DE"},
+				{label:"65岁以上",color:"0xFFFFFF"}
+			]);
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup top="5" right="5" left="5" bottom="5" width="100%" height="100%">
+		<s:Scroller id="previewScroller" width="100%" height="100%" >
+			<s:Group width="100%" height="100%">
+				<s:VGroup top="3" left="1" width="100%" height="100%">
+					<thematic:thematicItem title="七大区域冷库密度图" subtitle="2014年全国七大区域（台湾省数据缺失）冷库密度"
+										   layertype="dynamic" width="100%" map="{_map}" legend="{storeRegionLegend}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年全国七大区域冷库密度/MapServer"/>
+					<thematic:thematicItem title="七大区域冷藏车保有量图" subtitle="2014年全国七大区域（台湾省数据缺失）冷库保有量"
+										   layertype="dynamic" width="100%" map="{_map}"  legend="{vanNumberRegionLegend}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年全国七大区域冷藏车保有量/MapServer"/>
+					<thematic:thematicItem title="七大区域冷库保有量图" subtitle="2014年全国七大区域（台湾省数据缺失）冷库保有量"
+										   layertype="dynamic" width="100%" map="{_map}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年全国七大区域冷库保有量/MapServer"/>
+					<thematic:thematicItem title="各省冷库保有量图" subtitle="2014年全国各省（台湾省数据缺失）冷库保有量"
+										   layertype="dynamic" width="100%" map="{_map}" legend="{storeNumberLegend}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年各省冷库保有量/MapServer"/>
+					<thematic:thematicItem title="各省冷藏车保有量图" subtitle="2014年全国各省（台湾省数据缺失）冷藏车保有量"
+										   layertype="dynamic" width="100%" map="{_map}" legend="{vanNumberLegend}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年各省冷藏车保有量/MapServer"/>
+					<thematic:thematicItem title="各省冷藏车点密度图" subtitle="2014年全国各省（台湾省数据缺失）冷藏车密度"
+										   layertype="dynamic" width="100%" map="{_map}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/2014年各省冷藏车密度图/MapServer"/>
+				    <thematic:thematicItem title="王顶堤水产批发市场" subtitle="天津市南开区王顶堤水产批发市场"
+										   layertype="dynamic" width="100%" map="{_map}"
+										   url="http://xq-20150328qksy/MyArcGIS/rest/services/test/MapServer"/>
+					<thematic:thematicItem title="人口年龄结构专题图" subtitle="中国各省份（台湾省数据缺失）人口年龄结构的构成"
+										   layertype="tiled" width="100%" map="{_map}" legend="{peopleLegend}"
+										   url="http://cache1.arcgisonline.cn/ArcGIS/rest/services/Thematic_Pop_Eco/Population_Age_Structure/MapServer"/>
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:VGroup>
+</menuWidgets:CommonWindow>

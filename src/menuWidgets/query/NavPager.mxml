@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" >
+	<fx:Metadata>
+		[Event(name="navPagerEvent", type="menuWidgets.query.NavPageIndexChange")]
+	</fx:Metadata> 
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			[Bindable] public var pageIndex:int = 1;//当前页
+			[Bindable] public var pageSize:int = 10;//每页大小
+			[Bindable] public var pageCount:int = 0;//总共页数
+			[Bindable] private var _totalCount:int = 0;//总共记录数
+			public function get totalCount():int
+			{
+				return _totalCount;
+			}
+			public function set totalCount(value:int):void
+			{
+				_totalCount = value;
+				initPages();
+			}
+			
+			private function pageIndexChange():void
+			{
+			}
+			
+			/**
+			 * 初始化页数
+			 *   */
+			public function initPages():void
+			{
+				pageCount = Math.ceil(totalCount / pageSize);
+				if(pageCount > 3)
+				{
+					movePage.visible = true;
+					
+					pagerightall.enabled = true;
+					pageright.enabled = true;
+				}
+				else
+				{
+					movePage.visible = false;
+					
+					pagerightall.enabled = false;
+					pageright.enabled = false;
+				}
+				pageleftall.enabled = false;
+				pageleft.enabled = false;
+				
+				p_1.visible = true;
+				
+				
+				if(pageCount >= 2) p_2.visible = true;
+				else p_2.visible = false;
+				if(pageCount >= 3) p_3.visible = true;
+				else p_3.visible = false;
+				
+				if(pageCount >= 1){p_1.visible = true;buttomline.visible = true;}
+				else{p_1.visible = false;buttomline.visible = false;}
+				
+			}
+			
+			//上一组页码
+			private function prePageGroup():void
+			{
+				p_1.visible = true;
+				p_2.visible = true;
+				p_3.visible = true;
+				
+				var startPage:int = int(p_1.text);
+				p_1.text = (startPage - 3).toString();
+				p_2.text = (startPage - 2).toString();
+				p_3.text = (startPage - 1).toString();
+				
+				movePage.visible = true;
+				
+				if(startPage - 3 == 1)
+				{
+					pageleftall.enabled = false;
+					pageleft.enabled = false;
+				}
+				
+				pagerightall.enabled = true;
+				pageright.enabled = true;
+			}
+			
+			//下一组页码
+			private function nextPageGroup():void
+			{
+				var startPage:int = int(p_3.text);
+				if(startPage + 1 <= pageCount)
+				{
+					p_1.text = (startPage + 1).toString();
+					p_1.visible = true;
+				}
+				else
+					p_1.visible = false;
+				
+				if(startPage + 2 <= pageCount)
+				{
+					p_2.text = (startPage + 2).toString();
+					p_2.visible = true;
+				}
+				else
+					p_2.visible = false;
+				
+				if(startPage + 3 <= pageCount)
+				{
+					p_3.text = (startPage + 3).toString();
+					p_3.visible = true;
+				}
+				else
+					p_3.visible = false;
+				
+				
+				if(startPage + 3 < pageCount)
+				{
+					movePage.visible = true;
+					
+					pagerightall.enabled = true;
+					pageright.enabled = true;
+				}
+				else
+				{
+					movePage.visible = false;
+					
+					pagerightall.enabled = false;
+					pageright.enabled = false;
+				}
+				
+				pageleftall.enabled = true;
+				pageleft.enabled = true;
+			}
+			
+			//第一组页码
+			private function startPageGroup():void
+			{
+				p_1.visible = true;
+				p_2.visible = true;
+				p_3.visible = true;
+				
+				p_1.text = (1).toString();
+				p_2.text = (2).toString();
+				p_3.text = (3).toString();
+				
+				movePage.visible = true;
+				
+				pagerightall.enabled = true;
+				pageright.enabled = true;
+				
+				pageleftall.enabled = false;
+				pageleft.enabled = false;
+			}
+			
+			//最有一组页码
+			private function endPageGroup():void
+			{
+				
+				if((pageCount%3) == 0)
+				{
+					p_1.text = (pageCount-2).toString();
+					p_2.text = (pageCount-1).toString();
+					p_3.text = (pageCount).toString();
+				}
+				else
+				{
+					var lastPageCount:int = pageCount%3;
+					
+					switch(lastPageCount)
+					{
+						case 2:
+						{
+							p_1.text = (pageCount-1).toString();
+							p_2.text = (pageCount).toString();
+							p_3.visible = false;
+							break;
+						}
+						case 1:
+						{
+							p_1.text = (pageCount).toString();
+							p_2.visible = false;
+							p_3.visible = false;
+							break;
+						}
+						default:
+						{
+							break;
+						}
+					}
+				}
+				
+				movePage.visible = false;
+				
+				pagerightall.enabled = false;
+				pageright.enabled = false;
+				
+				pageleftall.enabled = true;
+				pageleft.enabled = true;
+			}
+			
+			//页码选择
+			protected function pageClick(event:MouseEvent):void
+			{
+				var target:Label = event.target as Label;
+				pageIndex = int(target.text);//记录当前页码
+				//通知页码变化
+				dispatchEvent(new NavPageIndexChange("navPagerEvent", pageIndex));
+				
+				buttomlineMove.xTo =  48 + target.x + target.width/2 - 5;
+				buttomlineMove.play();
+			}
+			
+			//页组变化时，检测页组中显示的第一个页数变化，更新选择页
+			protected function p_1_updateCompleteHandler(event:FlexEvent):void
+			{
+				p_1.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<s:Move id="buttomlineMove" duration="100"
+				target="{buttomline}" />
+	</fx:Declarations>
+	
+	<s:Rect id="buttomline" visible="false"
+			x="48" y="19" width="10" height="2">
+		<s:fill>
+			<s:SolidColor color="0xEFBB3A" />
+		</s:fill>
+	</s:Rect>
+	
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" height="25" gap="0" verticalAlign="middle">
+			<s:Image id="pageleftall" source="images/widget/pageleftall_24.png" enabled="false" click="startPageGroup()"
+					 rollOut="{gf_plt.alpha = 0}" rollOver="{gf_plt.alpha = 1}">
+				<s:filters>
+					<s:GlowFilter id="gf_plt" color="0x000000" alpha="0"/>
+				</s:filters>
+			</s:Image>
+			<s:Image id="pageleft" source="images/widget/pageleft_24.png" enabled="false" click="prePageGroup()"
+					 rollOut="{gf_pl.alpha = 0}" rollOver="{gf_pl.alpha = 1}">
+				<s:filters>
+					<s:GlowFilter id="gf_pl" color="0x000000" alpha="0"/>
+				</s:filters>
+			</s:Image>
+			<s:HGroup id="pageNum" gap="6" verticalAlign="middle">
+				<!--<s:Button skinClass="Skins.LinkButton.LinkButtonSkin" label="1"
+				color="0xEFBB3A"/>-->
+				<s:Label id="p_1" text="1" color="0x1D6FA7" verticalAlign="middle" textAlign="center" visible="false"
+						 click="pageClick(event)"
+						 rollOut="{p1_pl.alpha = 0}" rollOver="{p1_pl.alpha = 1}" updateComplete="p_1_updateCompleteHandler(event)">
+					<s:filters>
+						<s:GlowFilter id="p1_pl" color="0x000000" alpha="0"/>
+					</s:filters>
+				</s:Label>
+				<s:Label id="p_2" text="2" color="0x1D6FA7" verticalAlign="middle" textAlign="center" visible="false"
+						 click="pageClick(event)"
+						 rollOut="{p2_pl.alpha = 0}" rollOver="{p2_pl.alpha = 1}" >
+					<s:filters>
+						<s:GlowFilter id="p2_pl" color="0x000000" alpha="0"/>
+					</s:filters>
+				</s:Label>
+				<s:Label id="p_3" text="3" color="0x1D6FA7" verticalAlign="middle" textAlign="center" visible="false"
+						 click="pageClick(event)"
+						 rollOut="{p3_pl.alpha = 0}" rollOver="{p3_pl.alpha = 1}" >
+					<s:filters>
+						<s:GlowFilter id="p3_pl" color="0x000000" alpha="0"/>
+					</s:filters>
+				</s:Label>
+				<s:Label id="movePage" text="..." color="0x1D6FA7" height="100%" verticalAlign="middle" textAlign="center" visible="false"/>
+			</s:HGroup>
+			<s:Image id="pageright" source="images/widget/pageright_24.png" click="nextPageGroup()"
+					 rollOut="{gf_pr.alpha = 0}" rollOver="{gf_pr.alpha = 1}">
+				<s:filters>
+					<s:GlowFilter id="gf_pr" color="0x000000" alpha="0"/>
+				</s:filters>
+			</s:Image>
+			<s:Image id="pagerightall" source="images/widget/pagerightall_24.png" click="endPageGroup()"
+					 rollOut="{gf_prt.alpha = 0}" rollOver="{gf_prt.alpha = 1}">
+				<s:filters>
+					<s:GlowFilter id="gf_prt" color="0x000000" alpha="0"/>
+				</s:filters>
+			</s:Image>
+			<s:Spacer width="100%" />
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right">
+			<s:Label text="第{pageIndex}页" color="0xB2B2B2"/>
+			<s:Label text="-" color="0xB2B2B2"/>
+			<s:Label text="共{pageCount}页" color="0xB2B2B2"/>
+			<s:Label text="{_totalCount}条" color="0xB2B2B2"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>

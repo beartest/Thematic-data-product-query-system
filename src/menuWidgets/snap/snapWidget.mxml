@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+						  xmlns:s="library://ns.adobe.com/flex/spark"
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:menuWidgets="menuWidgets.*"
+						  xmlns:esri="http://www.esri.com/2008/ags"
+						  x="50" y="150" width="250" height="350" creationComplete="init()"
+						  skinClass="menuWidgets.CommonWindowSkin" 
+						  subtitle="截取地图界面并保存" title="地图截图">
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Graphic;
+			import com.esri.ags.Map;
+			import com.esri.ags.SpatialReference;
+			import com.esri.ags.events.DrawEvent;
+			import com.esri.ags.events.EditEvent;
+			import com.esri.ags.events.ExtentEvent;
+			import com.esri.ags.events.ZoomEvent;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.geometry.Geometry;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.symbols.SimpleFillSymbol;
+			import com.esri.ags.symbols.SimpleLineSymbol;
+			import com.esri.ags.tools.DrawTool;
+			import com.esri.ags.tools.EditTool;
+			
+			import menu.menu;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.TitleWindow;
+			
+			private var graphicsLayer:GraphicsLayer; //保存截图区域图层
+			private var drawTool:DrawTool;
+			private var endDraw:Boolean = true;
+			private var endEdit:Boolean = true;
+			private var drawSymbol:SimpleFillSymbol;
+			
+			[Bindable]
+			private var _map:Map;
+			public function get map():Map
+			{
+				return _map;
+			}
+			public function set map(value:Map):void
+			{
+				_map = value;
+				
+				if(_map)
+				{
+					graphicsLayer = new GraphicsLayer();
+					graphicsLayer.id = "SnapLayer";
+					graphicsLayer.name = "SnapLayer";
+					_map.addLayer(graphicsLayer);
+					
+					drawTool = new DrawTool();
+					drawTool.map = _map;
+					drawTool.addEventListener(DrawEvent.DRAW_END, drawEnd);
+					
+					drawSymbol =new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, 0x92B6E8, 0.5, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, 0xFFFFFF, 1, 2));
+				}
+			}
+			
+			protected function init():void
+			{
+				editTool.addEventListener(EditEvent.GRAPHICS_MOVE_STOP,refreshImagePreview);
+				editTool.addEventListener(EditEvent.GRAPHIC_SCALE_STOP,refreshImagePreview);
+			}
+			
+			//清空
+			protected function clear():void
+			{
+				imagepreview.source=null;
+				if(graphicsLayer)
+					graphicsLayer.clear();
+				if(editTool)
+					editTool.deactivate();
+			}
+			
+			//保存
+			private function save():void
+			{
+				var imgName:String = "地图截图.png";
+				var imgData:ByteArray;
+				var img:Bitmap;
+				
+				if (!imagepreview["source"]) //全图保存
+				{
+					imagepreview.source = captureMap(map.extent);
+				}
+				
+				img = imagepreview.source as Bitmap;
+				
+				var pngEnc:PNGEncoder = new PNGEncoder();
+				imgData = pngEnc.encode(img.bitmapData); 
+				
+				const fr:FileReference = new FileReference();
+				fr.save(imgData,imgName);
+				
+			} 
+			
+			//选择截图范围
+			private function activateSnapTool():void
+			{
+				
+				clear();
+				editTool.deactivate();
+				endDraw = false;
+				
+				if ( _map)
+				{
+					_map.cursorManager.removeAllCursors();
+					drawTool.activate(DrawTool.EXTENT, false);
+					drawTool.showDrawTips = true;
+					if (drawSymbol && drawSymbol is SimpleFillSymbol)
+					{
+						drawTool.fillSymbol = drawSymbol;
+					}
+				}
+				else
+				{
+					if(drawTool)
+					{
+						drawTool.deactivate();
+					}
+				}
+				this.isclose=true;
+			}			
+			
+			private function refreshImagePreview(event:EditEvent):void
+			{
+				var g:Graphic;
+				if (!event.graphic)
+				{
+					g = event.graphics[0];
+				} else {
+					g = event.graphic;
+				}
+				var extent:Extent = g.geometry as Extent;
+				g.alpha = 0;
+				editTool.deactivate();
+				imagepreview.source = captureMap(extent);
+				g.alpha = 1;
+				editTool.activate(EditTool.MOVE | EditTool.SCALE, [g]);
+			}
+			
+			private function drawEnd(event:DrawEvent):void
+			{
+				endDraw = true;
+				event.target.deactivate();
+				
+				var geo:Geometry = event.graphic.geometry;
+				var drawg:Graphic = new Graphic(geo);			
+				drawg.addEventListener(MouseEvent.CLICK, graphicClickHandler);
+				drawg.symbol = drawSymbol;
+				graphicsLayer.add(drawg);
+				graphicsLayer.visible = false;
+				var ext:Extent = event.graphic.geometry as Extent;
+				imagepreview.source = captureMap(ext);
+				graphicsLayer.visible = true;
+				this.isclose=false;
+			}
+			
+			//范围编辑
+			private function graphicClickHandler(event:MouseEvent):void
+			{
+				if(endEdit)
+				{
+					var editGraphic:Graphic = Graphic(event.target);
+					
+					if (editGraphic.geometry is Extent)
+					{
+						editTool.activate(EditTool.MOVE | EditTool.SCALE, [ editGraphic ]);
+					}
+					else
+					{
+						editTool.activate(EditTool.EDIT_VERTICES | EditTool.MOVE, [ editGraphic ]);
+					}
+				}
+				else
+				{
+					this.isclose = false;
+					editTool.deactivate();
+				}
+				endEdit = !endEdit;
+			}
+			
+			//截取对应范围
+			private function captureMap(ext:Extent):Bitmap
+			{
+				// configure map
+				var mapsnap:Map = _map;
+				mapsnap.logoVisible=false; 
+				mapsnap.scaleBarVisible=false;//比例尺
+				mapsnap.zoomSliderVisible = false;//导航条  
+				var currentMapColor:Object = mapsnap.getStyle("backgroundColor");
+				mapsnap.setStyle("backgroundColor", "#CCCCCC"); 
+				mapsnap.validateNow();
+				
+				// set rectangle capture
+				var extTopLeft:MapPoint = new MapPoint(ext.xmin,ext.ymin);
+				var extBottomRight:MapPoint = new MapPoint(ext.xmax,ext.ymax);
+				var rectTopLeft:Point = map.toScreen(extTopLeft);
+				var rectBottomRight:Point = map.toScreen(extBottomRight);
+				var rectClip:Rectangle = new Rectangle(rectTopLeft.x,rectBottomRight.y,rectBottomRight.x-rectTopLeft.x,rectTopLeft.y-rectBottomRight.y);
+				
+				// take the snap
+				var mapBitmapData:BitmapData = ImageSnapshot.captureBitmapData(mapsnap,null,null,null,rectClip,false);
+				var mapBitmap:Bitmap = new Bitmap(mapBitmapData);
+				var retBitmapData:BitmapData = new BitmapData(rectClip.width,rectClip.height);
+				retBitmapData.copyPixels(mapBitmapData,rectClip,new Point(0,0));
+				var retBitmap:Bitmap = new Bitmap(retBitmapData);
+				
+				mapsnap.scaleBarVisible=true;//比例尺
+				mapsnap.zoomSliderVisible = true;//导航条  
+				
+				return retBitmap;
+			}
+			
+			private var titleWindow:TitleWindow ;
+			protected function view():void
+			{   
+				var imgShow:menuWidgets.snap.ImageShow=new menuWidgets.snap.ImageShow();
+				imgShow.bitmap=imagepreview.source as Bitmap;
+				imgShow.x = (this.parent.width-imgShow.width)/2;
+				imgShow.y = (this.parent.height-imgShow.height)/2;
+				PopUpManager.addPopUp(imgShow,this.parent, true); 
+			}   
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<esri:EditTool id="editTool" map="{_map}"/>
+	</fx:Declarations>
+	
+	<s:VGroup left="5" right="5" top="5" bottom="5" width="100%" height="100%">
+		<s:HGroup width="100%">
+			<s:Button label="截图区域选择" click="activateSnapTool()" skinClass="skins.WidgetButton"  icon="images/widget/shape_square.png"/>
+			<s:Button label="清空" click="clear()" skinClass="skins.WidgetButton" icon="images/widget/map_delete.png"/>
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:Button label="预览" click="view()" skinClass="skins.WidgetButton"  icon="images/widget/map_magnify.png"/>
+			<s:Button label="保存" click="save()" skinClass="skins.WidgetButton" icon="images/widget/disk.png"/>
+		</s:HGroup>
+		
+		<!--截图预览-->
+		<s:Group width="100%" height="100%">
+			<s:Rect left="0" right="0" top="0" bottom="0" radiusX="2">
+				<s:stroke>
+					<s:SolidColorStroke color="#999999"/>
+				</s:stroke>
+			</s:Rect>
+			<s:Label alpha="0.7" color="#999999" fontFamily="宋体" fontSize="20" horizontalCenter="0"
+					 maxDisplayedLines="1" text="预览" verticalAlign="middle" verticalCenter="0"/>
+			<s:Scroller id="previewScroller" left="5" right="5" top="5" bottom="5" width="100%"
+						height="100%">
+				<s:Group>
+					<mx:Image id="imagepreview"/>
+				</s:Group>
+			</s:Scroller>
+		</s:Group>
+	</s:VGroup>
+</menuWidgets:CommonWindow>

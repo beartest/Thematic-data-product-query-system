@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menuWidgets:CommonWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx"
+						  xmlns:menuWidgets="menuWidgets.*"
+						  x="50" y="150" width="250" height="350"
+						  skinClass="menuWidgets.CommonWindowSkin"
+						  subtitle="控制图层显示隐藏及透明度" title="图层列表"
+						  creationComplete="init()" >
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.Map;
+			import com.esri.ags.events.MapEvent;
+			import com.esri.ags.layers.ArcGISTiledMapServiceLayer;
+			import com.esri.ags.layers.GraphicsLayer;
+			import com.esri.ags.layers.Layer;
+			import com.esri.ags.layers.OpenStreetMapLayer;
+			
+			import mainmap.BaiduLayer;
+			import mainmap.GoogleLayer;
+			import mainmap.TDT_WMTSLayer;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var _map:Map;
+			public function set map(value:Map):void
+			{
+				_map=value;
+				if(_map)
+				{
+					refreshlayersGroup();
+					_map.addEventListener(MapEvent.LAYER_ADD,refreshlayersGroup);
+					_map.addEventListener(MapEvent.LAYER_REMOVE,refreshlayersGroup);
+					_map.addEventListener(MapEvent.LAYER_REORDER,refreshlayersGroup);
+				}
+			}
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			protected function init():void
+			{
+				if(_map&&layersGroup.numElements==0)
+				{
+					refreshlayersGroup();
+				}
+			}
+			
+			//刷新图层列表
+			private function refreshlayersGroup():void
+			{
+				arguments; 
+				if(layersGroup!=null)
+				{
+					layersGroup.removeAllElements();
+					for each(var layer:Layer in _map.layers)
+					{
+						if(layer is GraphicsLayer)
+							continue;
+						var layeritem:layerItem=new layerItem();
+						layeritem.layer=layer;
+						layeritem.layerCheckBox.label=layer.id;
+						layersGroup.addElement(layeritem);
+					}
+				}
+			}
+			
+			protected function baselayer_changeHandler(event:IndexChangeEvent):void
+			{
+				if(_map == null)
+				{
+					return;
+				}
+				if(_map.layerIds.indexOf("背景底图") > -1)
+				{
+					_map.removeLayer(_map.getLayer("背景底图"));
+				}
+				if(_map.layerIds.indexOf("背景底图标注") > -1)
+				{
+					_map.removeLayer(_map.getLayer("背景底图标注"));
+				}
+				
+				switch(baselayertype.selectedIndex)
+				{
+					case 0://谷歌街区图
+					{
+						var gj:GoogleLayer = new GoogleLayer();
+						gj.url = "m@161000000";
+						gj.id = "背景底图";
+						_map.addLayer(gj,0);
+						break;
+					}
+					case 1://谷歌地形图
+					{
+						var gd:GoogleLayer = new GoogleLayer();
+						gd.url = "t@131";
+						gd.id = "背景底图";
+						_map.addLayer(gd,0);
+						break;
+					}
+					case 2://谷歌卫星图
+					{
+						var gw:GoogleLayer = new GoogleLayer();
+						gw.url = "s@134";
+						gw.id = "背景底图";
+						_map.addLayer(gw,0);
+						break;
+					}
+					case 3://Esri彩色图
+					{
+						var ec:ArcGISTiledMapServiceLayer = new ArcGISTiledMapServiceLayer();
+						//Esri Url 地址： REST 地址 http://cache1.arcgisonline.cn/ArcGIS/rest/services
+						//               SOAP 地址 http://cache1.arcgisonline.cn/arcgis/services/?wsdl 
+						ec.url = "http://www.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer";
+						ec.id = "背景底图";
+						_map.addLayer(ec,0);
+						break;
+					}
+					case 4://Esri暖色图
+					{
+						var en:ArcGISTiledMapServiceLayer = new ArcGISTiledMapServiceLayer();
+						en.url = "http://www.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineStreetWarm/MapServer";
+						en.id = "背景底图";
+						_map.addLayer(en,0);
+						break;
+					}
+					case 5://Esri冷色图
+					{
+						var el:ArcGISTiledMapServiceLayer = new ArcGISTiledMapServiceLayer();
+						el.url = "http://www.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineStreetCold/MapServer";
+						el.id = "背景底图";
+						_map.addLayer(el,0);
+						
+						break;
+					}
+					case 6://Esri灰色图
+					{
+						var eh:ArcGISTiledMapServiceLayer = new ArcGISTiledMapServiceLayer();
+						eh.url = "http://www.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineStreetGray/MapServer";
+						eh.id = "背景底图";
+						_map.addLayer(eh,0);
+						
+						break;
+					}
+					case 7://OpenStreet
+					{
+						var oj:OpenStreetMapLayer = new OpenStreetMapLayer();
+						oj.id = "背景底图";
+						_map.addLayer(oj,0);
+						break;
+					}	
+					case 8://天地图街区图
+					{
+						var tj:TDT_WMTSLayer = new TDT_WMTSLayer();
+						var tj_label:TDT_WMTSLayer = new TDT_WMTSLayer();
+						tj.baseURL = "http://t0.tianditu.com/vec_w/wmts";
+						tj.layerId = "vec";
+						tj.imageFormat = "tiles";
+						tj.tileMatrixSetId = "w";
+						tj.serviceMode = "KVP";
+						tj.id = "背景底图";
+						tj_label.baseURL = "http://t0.tianditu.com/cva_w/wmts";
+						tj_label.layerId = "cva";
+						tj_label.imageFormat = "tiles";
+						tj_label.tileMatrixSetId = "w";
+						tj_label.serviceMode = "KVP";
+						tj_label.id = "背景底图标注";
+						_map.addLayer(tj,0);
+						_map.addLayer(tj_label,1);
+						break;
+					}
+					case 9://天地图地形图
+					{
+						var td:TDT_WMTSLayer = new TDT_WMTSLayer();
+						var td_label:TDT_WMTSLayer = new TDT_WMTSLayer();
+						td.baseURL = "http://t0.tianditu.com/ter_w/wmts";
+						td.layerId = "ter";
+						td.imageFormat = "tiles";
+						td.tileMatrixSetId = "w";
+						td.serviceMode = "KVP";
+						td.id = "背景底图";
+						td_label.baseURL = "http://t0.tianditu.com/cta_w/wmts";
+						td_label.layerId = "cta";
+						td_label.imageFormat = "tiles";
+						td_label.tileMatrixSetId = "w";
+						td_label.serviceMode = "KVP";
+						td_label.id = "背景底图标注";
+						_map.addLayer(td,0);
+						_map.addLayer(td_label,1);
+						break;
+					}
+					case 10://天地图卫星图
+					{
+						var tw:TDT_WMTSLayer = new TDT_WMTSLayer();
+						var tw_label:TDT_WMTSLayer = new TDT_WMTSLayer();
+						tw.baseURL = "http://t0.tianditu.com/img_w/wmts";
+						tw.layerId = "img";
+						tw.imageFormat = "tiles";
+						tw.tileMatrixSetId = "w";
+						tw.serviceMode = "KVP";
+						tw.id = "背景底图";
+						tw_label.baseURL = "http://t0.tianditu.com/cia_w/wmts";
+						tw_label.layerId = "cia";
+						tw_label.imageFormat = "tiles";
+						tw_label.tileMatrixSetId = "w";
+						tw_label.serviceMode = "KVP";
+						tw_label.id = "背景底图标注";
+						_map.addLayer(tw,0);
+						_map.addLayer(tw_label,1);
+						break;
+					}
+					case 11://百度卫星图
+					{
+						var bw:BaiduLayer=new BaiduLayer("Image");
+						bw.id="背景底图";
+						_map.addLayer(bw,0);
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup left="5" right="5" top="5" bottom="5" width="100%" height="100%" gap="5">
+		<s:HGroup width="100%" height="30" verticalAlign="middle">
+			<s:Spacer width="10"/>
+			<s:Label text="底图切换：" width="70" height="100%" color="#656565" fontFamily="黑体" fontSize="13" maxDisplayedLines="1" verticalAlign="middle">
+				<s:filters>
+					<s:DropShadowFilter color="#FFFFFF" distance="0.5" strength="2" />
+				</s:filters>
+			</s:Label>
+			<s:ComboBox id="baselayertype" width="130" height="22" skinClass="skins.WidgetComboBox" fontFamily="黑体" fontSize="14" color="#656565" selectedIndex="0" change="baselayer_changeHandler(event)">
+				<s:ArrayCollection>
+					<fx:String>谷歌街区图</fx:String>  
+					<fx:String>谷歌地形图</fx:String>  
+					<fx:String>谷歌卫星图</fx:String>  
+					<fx:String>Esri彩色图</fx:String>  
+					<fx:String>Esri暖色图</fx:String>  
+					<fx:String>Esri冷色图</fx:String>  
+					<fx:String>Esri灰色图</fx:String>  
+					<fx:String>OpenStreet</fx:String>     
+					<fx:String>天地图街区图</fx:String>  
+					<fx:String>天地图地形图</fx:String>
+					<fx:String>天地图卫星图</fx:String>
+					<fx:String>百度卫星图</fx:String>
+				</s:ArrayCollection>
+			</s:ComboBox>
+		</s:HGroup>
+		
+		<!-- 分割线 -->
+		<mx:HRule width="100%"  strokeColor="#B2B2B2"/>
+		
+		<s:VGroup width="100%" height="100%">
+			<s:Scroller id="previewScroller" width="100%" height="100%" >
+				<s:Group width="100%" height="100%">
+					<s:VGroup id="layersGroup" width="100%"
+							  height="100%" paddingLeft="10" paddingRight="10">
+					</s:VGroup>
+				</s:Group>
+			</s:Scroller>	
+		</s:VGroup>
+	</s:VGroup>
+</menuWidgets:CommonWindow>
